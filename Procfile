@@ -1,1 +1,1 @@
-web: gunicorn map.wsgi
+web: gunicorn papago.wsgi
