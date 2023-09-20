@@ -1,0 +1,422 @@
+<!-- 檔案的路徑 -->
+<!--papago/papago/map/templates/index.html-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>行程規劃</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" 
+    rel="stylesheet" 
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" 
+    crossorigin="anonymous"
+    />
+
+    <style>
+        body {
+            background-color: #d4b8b4;
+            margin: 0;  
+        }
+        
+        #itinerary {
+            position: absolute;
+            padding: 10px;
+            left: 0;  
+            width: 20%; 
+            height: 100%;
+
+        }
+
+        #detial {
+            position: absolute;
+            padding: 10px;
+            left: 20%;
+            width: 20%;
+            height: 100%;
+
+        }
+    
+        #map {
+            position: absolute; 
+            padding: 10px;
+            margin-left: 10px;
+            left: 40%; 
+            width: 60%; 
+            height: 100%; 
+        }
+    </style>
+</head>
+
+<body>
+    <div id="itinerary">
+        <h3 class="mt-4">自動產生行程</h3>
+        <form id="itineraryForm">
+            {% csrf_token %}
+            地點: <input type="text" id="location" value="台北市"><br>
+            天數: <input type="text" id="days" value="3">
+        </form>
+        <button class="btn btn-primary mt-2" id="generate">產生行程</button>
+
+        <!-- 顯示生成的行程 -->
+        <div id="trip">
+            <h4 class="mt-4">行程規劃</h4>
+            <div id="placesContainer">
+                <ul class="list-group list-group-flush list-group-numbered" id="location-list"></ul>
+                <!-- 這裡將會顯示地點的矩形標籤 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 顯示地圖 -->
+    <div id="map"></div>
+
+    <!-- 顯示詳細資訊 -->
+    <div id="detial">
+        <h3>搜尋地點</h3>
+        <input id="search" type="text" placeholder="請輸入地點">
+        <button class="btn btn-primary mt-2" id="add">加入行程</button>
+
+        <!--顯示天氣資訊-->
+        <div id="weather"></div>
+    </div>
+
+{% load static %}
+<script>
+    let map;
+    let marker;
+    let markers = [];
+    let currentPosition;
+    let selectedMarker;
+    let directionsService;
+    let directionsRenderer;
+    let infodetail;
+    let infowindow;
+    let markerId = 0;
+    let markerInfoMap = new Map();  // 用於存儲標記和 InfoWindow 的對應關係
+
+    // 初始化地圖
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 23.477709920659528, lng: 120.95694302203336 }, // 玉山
+            zoom: 9
+        });
+
+        //搜尋框及自動完成
+        navigator.geolocation.getCurrentPosition(function(position) {
+            currentPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            map.setCenter(currentPosition);
+            map.setZoom(13);
+
+        
+            //設定搜尋框
+            const autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById("search"),{
+                    types: [
+                        "restaurant","airport","zoo","tourist_attraction","museum",
+                    ],
+                    bounds: {
+                        east: currentPosition.lng + 0.001,
+                        west: currentPosition.lng - 0.001,
+                        north: currentPosition.lat + 0.001,
+                        south: currentPosition.lat - 0.001
+                    },
+                    strictBounds: false,
+            });
+
+            //設定自動完成，當按下地點時，取得地點資訊
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                
+                selectedMarker = {
+                    location: place.geometry.location,
+                    placeId: place.place_id,
+                    name: place.name,
+                    address: place.formatted_address,
+                    phoneNumber: place.formatted_phone_number,
+                    rating: place.rating,
+                    reviews: place.reviews,
+                    opening_hours: place.opening_hours ? place.opening_hours : "none",
+                };
+                console.log("location:", selectedMarker.location);
+                console.log("location_type:", typeof selectedMarker.location);
+                //地圖中心移動到選擇的地點
+                map.setCenter(selectedMarker.location);
+
+                if (!marker) {
+                    marker = new google.maps.Marker({
+                        map
+                    });
+                }
+                marker.setPosition(selectedMarker.location);//建立標記
+
+                if (!directionsService) {
+                    directionsService = new google.maps.DirectionsService();
+                }
+
+                if (!directionsRenderer) {
+                    directionsRenderer = new google.maps.DirectionsRenderer({
+                        map
+                    });
+                }
+
+                //計算路徑
+                directionsRenderer.set("directions", null);
+                directionsService.route(
+                    {
+                        origin: new google.maps.LatLng(
+                            currentPosition.lat,
+                            currentPosition.lng
+                        ),
+                        destination: {
+                            placeId: selectedMarker.placeId,
+                        },
+                        provideRouteAlternatives: false,
+                        travelMode: 'DRIVING',
+                        drivingOptions: {
+                        departureTime: new Date(/* now, or future date */),
+                        trafficModel: 'pessimistic'
+                        },
+                    },
+                    function (response, status) {
+                        if (status === "OK") {
+                            directionsRenderer.setDirections(response);
+
+                            //顯示詳細資訊
+                            if (!infodetail) {
+                                infodetail = new google.maps.InfoWindow();
+                            }
+                            infodetail.setContent(`
+                                <h3>${selectedMarker.name}</h3>
+                                <div>地址: ${selectedMarker.address}</div>
+                                <div>電話: ${selectedMarker.phoneNumber}</div>
+                                <div>評分: ${selectedMarker.rating}</div>
+                                <div>車程: ${response.routes[0].legs[0].duration.text}</div>
+                                <div>營業時間: ${
+                                    selectedMarker.opening_hours === "none" 
+                                    ? "無資料" 
+                                    : selectedMarker.opening_hours.weekday_text
+                                }</div>
+                            `);
+                            infodetail.open(map, marker);
+                        }
+                    }
+                );
+            });
+        });//搜尋框及自動完成結束
+
+        //後端利用openai自動產生行程，前端按"產生行程"按鈕後，後端回傳行程地名與座標
+        document.getElementById("generate").addEventListener("click", function(event) {
+            event.preventDefault();
+                
+            //前端取得行程地名與座標
+            const location = $("#location").val();
+            const days = $("#days").val();
+
+            //傳資料到後端，並加入氣溫資訊
+            $.post("/map/get_weather_forecast/", {location: location}, function(response) {
+                const temperature = response.temperature;
+                document.getElementById("weather").innerHTML += `<div>氣溫：${temperature}°C</div>`;
+                });
+            
+            //傳資料到後端
+            $.post('/map/generate_itinerary/', { location: location, days: days }, function(data) {
+                //console.log("Received data from backend:", data);
+                //console.log("lat:", data.places[0].lat);
+                //console.log("lng:", data.places[0].lng);
+                
+                //for each前端取得詳細資訊加到selectedMarker
+                const geocoder = new google.maps.Geocoder();
+                const service = new google.maps.places.PlacesService(map);
+                data.places.forEach((place, index) => {
+                    if (place.lat && place.lng) {
+                    const latLng = new google.maps.LatLng(place.lat, place.lng);
+                    //console.log("index:", index);
+                    //console.log("latLng:", latLng);
+                    //console.log("type_lat:",typeof place.lat, "type_lng:",typeof place.lng);
+                    //console.log("lat:", latLng.lat(), "lng:", latLng.lng());
+                    
+                    // 使用 Geocoder 進行逆地理編碼
+                    geocoder.geocode({'location': latLng}, function(results, status) {
+                        if (status === google.maps.GeocoderStatus.OK) {
+                            if (results[0]) {
+                                const placeId = results[0].place_id;
+                                //console.log("Place ID: ", placeId);
+
+                                // 使用獲得的 placeId 來獲取詳細資訊
+                                service.getDetails({
+                                    placeId: placeId,
+                                    fields: ['name', 'formatted_address', 'formatted_phone_number', 'rating', 'reviews', 'opening_hours']
+                                }, function(details, status) {
+                                    //console.log("Status:", status);
+                                    //console.log("Details:", details);
+                                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                        //console.log("status_placesService:", status);
+                                        if (details) {
+                                        // 儲存詳細資訊
+                                            const generateDetails = {
+                                                location: latLng,
+                                                placeId: details.place_id ?? "未提供",
+                                                name: place.name,
+                                                address: details.formatted_address ?? "未提供",
+                                                phoneNumber: details.formatted_phone_number ?? "未提供",
+                                                rating: details.rating ?? "未提供",
+                                                reviews: details.reviews ?? [],
+                                                opening_hours: details.opening_hours ?? "未提供",
+                                                //photo: details.photos[0].getUrl({maxWidth: 35, maxHeight: 35}),
+                                            };
+                                            //console.log("generateDetails:", generateDetails);
+                                            //console.log("location:", generateDetails.location);
+                                            //console.log("Photo URL: ", details.photos[0].getUrl({maxWidth: 35, maxHeight: 35}));
+
+                                        
+                                        // 在地圖上創建標記
+                                        const generateMarker = new google.maps.Marker({
+                                            position: generateDetails.location,
+                                            map: map,
+                                            title: generateDetails.name
+                                        });
+                                        
+
+                                        //顯示詳細資訊
+                                        infowindow = new google.maps.InfoWindow();
+                                        infowindow.setContent(`
+                                            <h3>${generateDetails.name}</h3>
+                                            {% comment %} <div><img src="${generateDetails.photo}" alt="${generateDetails.name}" width="35"/></div> {% endcomment %}
+                                            <div>地址: ${generateDetails.address}</div>
+                                            <div>電話: ${generateDetails.phoneNumber}</div>
+                                            <div>評分: ${generateDetails.rating}</div>
+                                            {% comment %} <div>車程: ${response.routes[0].legs[0].duration.text}</div> {% endcomment %}
+                                            <div>營業時間: ${
+                                                generateDetails.opening_hours && generateDetails.opening_hours.weekday_text
+                                                ? generateDetails.opening_hours.weekday_text 
+                                                : "未提供"
+                                            }</div>
+                                        `);
+                                        infowindow.open(map, generateMarker);
+
+                                        // 保存 marker 和 InfoWindow(0914)
+                                        markerInfoMap.set(generateDetails.name, {
+                                            marker: generateMarker,
+                                            infoWindow: infowindow
+                                        });
+                                        
+                                        //加入行程標籤在視窗左側行程規劃底下
+                                        document.getElementById("location-list").innerHTML += `
+                                            <li class="list-group-item">
+                                                ${generateDetails.name}
+                                                <button class="btn-close float-end remove"></button>
+                                            </li>
+                                        `;
+
+                                        
+                                        // 將新地點添加到 localStorage 中的地點列表
+                                        const detailList = JSON.parse(localStorage.getItem("location-list")) || [];
+                                        detailList.push(generateDetails);
+                                        localStorage.setItem("location-list", JSON.stringify(detailList));
+                                        }
+                                    } else {
+                                        console.log("Missing details");
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            console.log("Geocoder failed due to: " + status);
+                        }
+                    });
+                }
+                });
+            });
+        });//自動產生行程結束
+    }
+    //initmap結束
+
+
+    // 加入行程標籤(在initMap外面)
+    document.getElementById("add").addEventListener("click", function() {
+        document.getElementById("location-list").innerHTML += `
+            <li class="list-group-item">
+                ${selectedMarker.name}
+                <button class="btn-close float-end remove"></button>
+            </li>
+        `
+        const locationList = JSON.parse(localStorage.getItem("location-list")) || [];
+        locationList.push(selectedMarker);
+        localStorage.setItem("location-list", JSON.stringify(locationList));
+    });
+
+    // 刪除行程標籤
+    document.getElementById("location-list").addEventListener("click", function(e) {
+        if (e.target.classList.contains("remove")) {
+            e.target.parentElement.remove();
+            const locationName = e.target.parentNode.innerText.trim();
+
+            // 刪除地圖上的相應標記(0914)
+            const markerInfo = markerInfoMap.get(locationName);
+            if (markerInfo) {
+                markerInfo.marker.setMap(null);  // 從地圖上移除標記
+                markerInfoMap.delete(locationName);  // 從 Map 中移除這個項目
+            }
+            
+            const locationList = JSON.parse(localStorage.getItem("location-list")) || [];
+            const newLocationList = locationList.filter(function(location) {
+                if (location.name === locationName) return false;
+                return true;
+            });
+            localStorage.setItem("location-list", JSON.stringify(newLocationList));
+        }
+    });
+
+    // 點擊 location-list 中的項目(0914)
+    document.getElementById("location-list").addEventListener("click", function(e) {
+        if (e.target.tagName === "LI") {
+            const locationName = e.target.innerText.trim();
+            const markerInfo = markerInfoMap.get(locationName);
+            if (markerInfo) {
+                markerInfo.infoWindow.open(map, markerInfo.marker);
+            }
+        }
+    });
+    
+    // 在地圖上添加標記
+    function addMarker(location) {
+        let marker = new google.maps.Marker({
+            position: location,
+            map: map,
+            draggable:false,
+            customId: markerId++
+        });
+        markers.push(marker);  // 將新標記添加到標記數組中
+    }
+
+    
+   // 刪除所有標記
+    function deleteMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+            if (markers[i].marker) {
+                markers[i].marker.setMap(null);
+            }
+            if (markers[i].label) {
+                markers[i].label.remove();
+            }
+        }
+        markers = [];
+    }
+
+    
+</script>
+<script 
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYOZJoIH2RaGmyx7YnJT1S9XAyL56uKdA&libraries=places&callback=initMap&region=TW&language=zh-TW"
+async defer></script>
+</body>
+</html>

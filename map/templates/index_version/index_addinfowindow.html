@@ -1,0 +1,300 @@
+<!-- 檔案的路徑 -->
+<!--papago/papago/map/templates/index.html-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>行程規劃</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYOZJoIH2RaGmyx7YnJT1S9XAyL56uKdA&libraries=places"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            background-color: #d4b8b4;  
+        }
+        
+        #trip {
+            position: absolute;
+            left: 0; 
+            top: 40px; 
+            width: 20%; 
+            height: 100%;
+            overflow-y: auto;  
+        }
+    
+        #map {
+            position: absolute; 
+            left: 20%; 
+            width: 60%; 
+            height: 100%; 
+        }
+
+        #itineraryForm input {
+            width: 50px;
+        }
+
+        #itineraryForm {
+            position: absolute;
+            width: 20%;
+            height: 40px;  
+            
+        }
+
+        .place-card {
+            width: 200px;
+            height: 100px;
+            margin: 15px;
+            padding: 10px;
+            background-color: #ddd0c8; 
+            border: 2px solid #e0e0e0;  /* 邊框 */
+            border-radius: 5px;  /* 圓角 */
+            display: flex;  
+            align-items: center;  /* 垂直居中 */
+            justify-content: center;  /* 水平居中 */
+            font-size: 18px;
+            transition: background-color 0.3s;  /* 漸變效果 */
+        }
+    
+        .place-card:hover {
+            background-color: #e2c6c4;  /* 滑鼠懸停時的背景顏色 */
+        }
+
+        .place-card-content {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .delete-button {
+            margin-left: 10px;
+            background-color: #976666;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #reviews {
+            position: absolute;
+            right: 0;
+            width: 20%;
+            height: 100%;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="itineraryForm">
+        地點: <input type="text" id="location" value="台北">
+        天數: <input type="text" id="days" value="3">
+        {% csrf_token %}
+        <button type="button" onclick="generateItinerary()">產生行程</button>
+    </form>
+
+    <!-- 顯示生成的行程 -->
+    <div id="trip">
+        <div id="placesContainer">
+            <!-- 這裡將會顯示地點的矩形標籤 -->
+        </div>
+    </div>
+    
+    
+
+    <div id="map"></div>
+
+
+    <!-- 這裡是評論摘要 -->
+    <div id="reviews">
+        <!-- 評論資訊將會放在這裡 -->
+    </div>
+
+{% load static %}
+<script>
+    let map;
+    let markers = [];
+    
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 23.477709920659528, lng: 120.95694302203336 }, // 玉山
+            zoom: 9
+        });
+       
+        const request = {
+            placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
+            fields: ["name", "formatted_address", "formatted_phone_number", "place_id", "geometry"],
+        };
+
+        const labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let labelIndex = 0;
+        map.addListener('click', function(event) {
+            addMarker(event.latLng);
+        });
+
+
+        const infowindow = new google.maps.InfoWindow();
+        const service = new google.maps.places.PlacesService(map);
+
+        service.getDetails(request, (place, status) => {
+            if (
+                status === google.maps.places.PlacesServiceStatus.OK &&
+                place &&
+                place.geometry &&
+                place.geometry.location
+
+            ) {
+                const marker = new google.maps.Marker({
+                    map,
+                    position: place.geometry.location,
+                    
+                });
+
+
+                google.maps.event.addListener(marker, "click", () => {
+                    const content = document.createElement("div");
+                    const nameElement = document.createElement("h2");
+
+                    nameElement.textContent = place.name;
+                    content.appendChild(nameElement);
+
+                    const placeIdElement = document.createElement("p");
+
+                    placeIdElement.textContent = place.place_id;
+                    content.appendChild(placeIdElement);
+
+                    const placeAddressElement = document.createElement("p");
+
+                    placeAddressElement.textContent = place.formatted_address;
+                    content.appendChild(placeAddressElement);
+
+                    const placePhoneElement = document.createElement("p");
+
+                    placePhoneElement.textContent = place.formatted_phone_number;
+                    content.appendChild(placePhoneElement);
+
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+                });
+            }
+        });
+    }
+
+    
+    let markerId = 0;
+    // 在地圖上添加標記
+    function addMarker(location) {
+        let marker = new google.maps.Marker({
+            position: location,
+            map: map,
+            customId: markerId++
+        });
+    
+        // 為此標記添加點擊事件監聽器、設置標籤等。        
+        markers.push(marker);  // 將新標記添加到標記數組中
+
+        console.log("Current marker's customId:", marker.customId);
+        console.log("Markers array after addition:", markers);
+    }
+
+
+    // 生成行程
+    function generateItinerary() {
+        const location = $("#location").val();
+        const days = $("#days").val();
+    
+        // 清空現有標記和標籤
+        deleteMarkers();
+        $("#placesContainer").empty();
+    
+        // 生成行程
+        $.post('/map/generate_itinerary/', { location: location, days: days }, function(data) {
+            let placesHTML = "";
+            
+            // 將行程中的地點顯示在地圖上
+            data.places.forEach((place, index) => {
+                const latLng = new google.maps.LatLng(place.lat, place.lng);
+                const marker = new google.maps.Marker({
+                    position: latLng,
+                    map: map,
+                    title: place.name,
+                    customId: markerId
+                });
+                console.log("Current marker's customId:", marker.customId);
+                                
+                // 將行程標籤顯示在頁面上
+                placesHTML += `
+                <div class="place-card" data-id="${markerId}">
+                    <div class="place-card-content">${place.name}</div>
+                    <button class="delete-button" onclick="removePlace(${markerId})">刪除</button>
+                </div>`;
+                        
+                // 將地點資訊在地圖上   
+                const infowindow = new google.maps.InfoWindow({
+                    content: `<div><p>${place.name}</p></div>`
+                }); 
+        
+                // 為此標記添加點擊事件監聽器、設置標籤等。
+                marker.addListener("click", () => {
+                    infowindow.open({
+                        anchor: marker,
+                        map
+                    });
+                });
+    
+                const label = $(`.place-card[data-id="${markerId}"]`);
+                // 將標記和標籤添加到數組中
+                markers.push({
+                    id: markerId,
+                    marker: marker,
+                    label: label
+                });
+                markerId++;
+            });
+        
+            // 將行程標籤顯示在頁面上
+            $("#placesContainer").html(placesHTML);
+            console.log("Markers array after generation:", markers);
+            console.log("Places HTML:", placesHTML);
+            
+
+            
+        });
+    }
+    
+    // 刪除指定的地點
+    function removePlace(id) {
+        console.log("Markers array before deletion:", markers);
+        const markerIndex = markers.findIndex(item => item.id === id);  // 根據ID查找標記和標籤
+        if (markerIndex !== -1) {
+            let markerObject = markers[markerIndex];
+            console.log("Marker to delete:", markerObject);
+            markerObject.marker.setMap(null);  // 移除標記
+            markers.splice(markerIndex, 1);    // 從數組中移除物件
+        }
+        $(".place-card[data-id='" + id + "']").remove();  // 從頁面上移除標籤
+    }
+    
+   // 刪除所有標記
+    function deleteMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].marker.setMap(null);
+            markers[i].label.remove();
+        }
+        markers = [];
+    }
+
+
+    // 當頁面載入完成時，初始化地圖
+    initMap();
+    
+
+    
+</script>
+</body>
+</html>

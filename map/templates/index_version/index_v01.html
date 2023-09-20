@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>旅行計劃</title>
+</head>
+<body>
+    <h1>旅行計劃</h1>
+    
+    <!-- 輸入地點和天數的表單 -->
+    <form action="{% url 'generate_trip' %}" method="post">
+        {% csrf_token %}
+        <label for="location">地點：</label>
+        <input type="text" id="location" name="location" required><br>
+        <label for="days">天數：</label>
+        <input type="number" id="days" name="days" required><br>
+        <button type="submit">生成行程</button>
+    </form>
+    
+    <!-- 顯示生成的行程 -->
+    <div id="trip">
+        <!-- 循環迭代行程的地點和座標 -->
+        {% for location, coordinates in trip_data %}
+            <div>
+                <h2>{{ location }}</h2>
+                <p>座標：{{ coordinates.0 }}, {{ coordinates.1 }}</p>
+            </div>
+            
+            <!-- 調用addmarker函數 -->
+            {% comment %} <script>
+                var lat = {{ coordinates.0 }};
+                var lng = {{ coordinates.1 }};
+                addMarker(lat, lng, '{{ location }}');
+            </script> {% endcomment %}
+        {% endfor %}
+    </div>
+    
+    <!-- 嵌入 Google 地圖 -->
+    <div id="map" style="width: 50%; height: 400px; float: right;"></div>
+    <!-- 引入 Google Maps JavaScript 庫 -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYOZJoIH2RaGmyx7YnJT1S9XAyL56uKdA"></script>
+    
+    <!-- 顯示行程在地圖上 -->
+    <script>
+        // 初始化 Google 地圖
+        function initMap() {
+            var mapOptions = {
+                center: { lat: 23.857168762698514, lng: 120.91579156623988 }, // 使用你的座標替換
+                zoom: 7 // 縮放級別
+            };
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+    
+            // 建立一個標記
+            var marker = new google.maps.Marker({
+                position: { lat: 23.857168762698514, lng: 120.91579156623988 }, // 使用你的座標替換
+                map: map,
+                title: '日月潭'
+            });
+        }
+    </script>
+    
+    <!-- 在頁面載入時初始化地圖 -->
+    <script>
+        initMap();
+    </script>
+
+
+
+    <!-- 顯示行程在地圖上 -->
+    <script>
+        function addMarker(lat, lng, locationName) {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: lat, lng: lng },
+                zoom: 15
+            });
+
+            var marker = new google.maps.Marker({
+                position: { lat: lat, lng: lng },
+                map: map,
+                title: locationName
+            });
+        }
+    </script>
+    
+</body>
+</html>
