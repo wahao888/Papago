@@ -7,6 +7,9 @@ import requests
 import os
 from dotenv import load_dotenv
 import re
+import json
+from .models import TripInfo, User
+
 
 load_dotenv()
 GOOGLE_MAP_API_KEY = os.environ.get('GOOGLE_MAP_API_KEY')
@@ -117,10 +120,58 @@ def get_weather_forecast(request):
             return JsonResponse({"error": "Unable to get weather data"}, status=response.status_code)
     else:
         return render(request, 'index.html')
+    
 
+# 儲存行程
+@csrf_exempt
+def save_trip(request):
+    if request.method == 'POST':
+        user_id = request.GET.get('user_id', 1)  # 從查詢參數中獲取 user_id，默認為 1 測試用
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'fail', 'message': 'User does not exist'})
+        
+        # 先刪除與這個用戶相關的所有行程
+        TripInfo.objects.filter(user=user).delete()
 
+        # 現在保存新行程
+        trip_name = request.POST.get('trip_name')
+        trip_day = int(request.POST.get('trip_day'))
+        location_tags = json.loads(request.POST.get('location_tags'))
+        clean_location_tags = [tag.strip() for tag in location_tags]
+        location_info_map = json.loads(request.POST.get('location_info_map'))
+        print("trip_name:",trip_name)
+        print("trip_day:",trip_day)
+        print("clean_location_tags:",clean_location_tags)
+        print("location_info_map:",location_info_map)
 
+        for tag in clean_location_tags:
+            info = next((item for item in location_info_map if item[0].strip() == tag), None)
+            if info:
+                TripInfo.objects.create(
+                    user=user,
+                    trip_name=trip_name,
+                    trip_day=trip_day,
+                    location_name=tag,
+                    latitude=info[1]['lat'],
+                    longitude=info[1]['lng']
+                )
 
+        return JsonResponse({'status': 'success', 'message': 'Trip saved successfully'})
+    else:
+        return JsonResponse({'status': 'fail', 'message': 'Invalid method'})
 
+    
 
+# #取得儲存的行程
+# @csrf_exempt
+# def get_latest_trip_locations(request):
+#     user = request.user  # 從請求中獲取當前用戶
+#     latest_trip = Trip.objects.filter(user=user).latest('created_date')
+#     day = Day.objects.get(trip=latest_trip, day_number=1)  # 假設只有一天
+#     locations = Location.objects.filter(day=day).values('name', 'latitude', 'longitude')
 
+#     location_info_map = {loc['name']: {'lat': loc['latitude'], 'lng': loc['longitude']} for loc in locations}
+
+#     return JsonResponse({'status': 'success', 'location_info_map': location_info_map})

@@ -78,9 +78,13 @@ WSGI_APPLICATION = "papago.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',  # 使用 MySQL 引擎
+        'NAME': 'lknnsgtgliqdghcv',  # 資料庫名稱
+        'USER': 'pmj7xwe9oi3v0ijh',  # 資料庫用戶名
+        'PASSWORD': 'z67qdt8z2nuk9e41',  # 資料庫密碼
+        'HOST': 'cis9cbtgerlk68wl.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',  # 資料庫主機
+        'PORT': '3306',  # 資料庫埠號
     }
 }
 
