@@ -6,3 +6,4 @@ requests
 python-dotenv
 mysqlclient==2.2.0
 django-allauth==0.57.0
+line-bot-sdk==1.14.0
