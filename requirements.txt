@@ -5,4 +5,4 @@ openai
 requests
 python-dotenv
 mysqlclient==2.2.0
-allauth
+django-allauth==0.57.0
