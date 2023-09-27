@@ -1,0 +1,49 @@
+<html>
+   {% load socialaccount %}
+   <body>
+
+      <form name = "form" action = "{% url 'login' %}" method = "POST" >
+          {% csrf_token %}
+
+         <div style = "max-width:470px;">
+            <center>
+               <input type = "text" style = "margin-left:20%;"
+                  placeholder = "Account" name = "account" />
+            </center>
+         </div>
+
+         <br>
+
+         <div style = "max-width:470px;">
+            <center>
+               <input type = "password" style = "margin-left:20%;"
+                  placeholder = "password" name = "pwd" />
+            </center>
+         </div>
+
+         <br>
+
+         <div style = "max-width:470px;">
+            <center>
+
+               <button style = "border:0px; background-color:#4285F4; margin-top:8%;
+                  height:35px; width:80%;margin-left:19%;" type = "submit"
+                  value = "Login" >
+                  <strong>Login</strong>
+               </button>
+
+            </center>
+         </div>
+
+         {% if user.is_authenticated %}
+          <li>User: {{ user.first_name }} {{ user.last_name }}</li>
+          <li><a href="{% url 'account_logout' %}">Logout</a></li>
+          {% else %}
+          <li><a href="{% url 'account_login' %}">Login</a></li>
+          {% endif %}
+
+      </form>
+
+   </body>
+</html>
+

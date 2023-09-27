@@ -164,14 +164,14 @@ def save_trip(request):
 
     
 
-# #取得儲存的行程
+# # #取得儲存的行程
 # @csrf_exempt
-# def get_latest_trip_locations(request):
-#     user = request.user  # 從請求中獲取當前用戶
-#     latest_trip = Trip.objects.filter(user=user).latest('created_date')
-#     day = Day.objects.get(trip=latest_trip, day_number=1)  # 假設只有一天
-#     locations = Location.objects.filter(day=day).values('name', 'latitude', 'longitude')
-
-#     location_info_map = {loc['name']: {'lat': loc['latitude'], 'lng': loc['longitude']} for loc in locations}
-
-#     return JsonResponse({'status': 'success', 'location_info_map': location_info_map})
+# def get_saved_trip(request):
+#     user_id = request.GET.get('user_id', 1)  # 從查詢參數中獲取 user_id，默認為 1 測試用
+#     try:
+#         user = User.objects.get(id=user_id)
+#     except User.DoesNotExist:
+#         return JsonResponse({'status': 'fail', 'message': 'User does not exist'})
+    
+#     saved_trips = TripInfo.objects.filter(user=user).values()
+#     return JsonResponse({'status': 'success', 'data': list(saved_trips)})

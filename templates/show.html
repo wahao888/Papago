@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>顯示照片</title>
+</head>
+<body>
+  <h2>選擇資料夾</h2>
+  <ul>
+    {% for folder in folders %}
+      <li><a href="?folder={{ folder.folder }}">{{ folder.folder }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <h2>圖片</h2>
+  <ul>
+    {% if photos %}
+      {% for photo in photos %}
+        <li>
+          <img src="{{ photo.picture.url }}" alt="{{ photo.folder }}">
+        </li>
+      {% endfor %}
+    {% else %}
+      <p>選擇一個資料夾以查看圖片。</p>
+    {% endif %}
+  </ul>
+</body>
+</html>

@@ -16,8 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    #產生行程
     path("map/", include("map.urls")),
+    #登入系統
+    path("accounts/", include("allauth.urls")),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    #papabot聊天機器人
+    path("papabot/", include("papabot.urls")),
+    #主頁面
+    path("", include("main.urls")),
+    #blog
+    path("blog/", include("blog.urls")),
+    
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                    document_root=settings.MEDIA_ROOT)

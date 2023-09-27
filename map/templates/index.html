@@ -694,24 +694,40 @@ $("#saveTripButton").click(function() {
     });
 });
 
-//重建資料庫中的 locationInfoMap(0922)
-function rebuildLocationInfoMap() {
+//重建資料庫中的 locationInfoMap(0926)
+// 在用戶登入後呼叫這個函數
+function loadSavedTrip() {
     $.ajax({
-        url: '/map/get_latest_trip_locations/',
+        url: '/map/get_saved_trip/',  
         method: 'GET',
+        data: {
+            'user_id': loggedInUserId  // 用戶的 ID
+        },
         success: function(response) {
             if (response.status === 'success') {
-                locationInfoMap = new Map(Object.entries(response.location_info_map));
-                localStorage.setItem('locationInfoMap', JSON.stringify(Array.from(locationInfoMap.entries())));
-                // 現在 locationInfoMap 已經用新資料初始化
-                // 可以在這裡添加其他用來更新UI的程式碼
+                const savedTrips = response.data;
+                const latLngInfoMap = new Map();
+                savedTrips.forEach(trip => {
+                    latLngInfoMap.set(trip.location_name, {
+                        lat: trip.latitude,
+                        lng: trip.longitude
+                    });
+                });
+                // 現在你有了重建好的 latLngInfoMap，你可以使用這個 Map 來重建行程
+            } else {
+                console.log("無法獲取保存的行程:", response.message);
             }
         },
         error: function(error) {
-            console.log("取得位置資料出錯:", error);
+            console.log("獲取保存的行程出錯:", error);
         }
     });
 }
+
+
+
+
+
 
 
 

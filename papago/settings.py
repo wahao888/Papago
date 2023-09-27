@@ -34,13 +34,27 @@ ALLOWED_HOSTS = ['papago-a3dca40def52.herokuapp.com', 'localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    "map",
+    
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    #產生行程
+    "map",
+    #以下為第三方驗證登入
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.line",
+    "papabot",
+    #主頁面
+    "main",
+    #blog
+    "blog",
 ]
 
 MIDDLEWARE = [
@@ -51,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware", #第三方驗證登入
 ]
 
 ROOT_URLCONF = "papago.urls"
@@ -58,7 +73,8 @@ ROOT_URLCONF = "papago.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS":  [os.path.join(BASE_DIR, 'templates'),
+                os.path.join(BASE_DIR, 'templates', 'allauth')], #新增讀取allauth templates
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -127,9 +143,49 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+
 django_heroku.settings(locals())
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#Google login
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
+SITE_ID = 2
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "optional" #mandatory: 強制
+ACCOUNT_LOGOUT_ON_GET = True
+LOGIN_REDIRECT_URL = "/"
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+
+#LINE login
+SOCIALACCOUNT_PROVIDERS = {
+    "line" : {
+        "SCOPE" : [
+            "profile",
+            "openid",
+            "email",
+        ]
+    }
+}
+
+#Email設定
+EMAIL_BACKED = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "awhchang"
+EMAIL_HOST_PASSWORD = "hzqqcpqsfeshspgh"
+EMAIL_PORT = "465"
+EMAIL_USE_SSL = "True"
+ADMINS = (('awhchang', 'awhchang@gmail.com'),)
+MANAGERS = (('awhchang', 'awhchang@gmail.com'),)
+
+
+#圖片上傳
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

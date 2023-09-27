@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Travel Logs</title>
+</head>
+<body>
+    <h1>Travel Logs</h1>
+
+    <form method="get">
+        <label for="log_select">Select a Travel Log:</label>
+        <select id="log_select" name="log_id">
+            {% for log in travel_logs %}
+                <option value="{{ log.id }}">{{ log.title }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">View Log</button>
+    </form>
+
+    {% if selected_log %}
+        <h2>{{ selected_log.title }}</h2>
+        <p>{{ selected_log.content }}</p>
+        <p>Created on: {{ selected_log.date_created }}</p>
+    {% endif %}
+</body>
+</html>
