@@ -5,3 +5,4 @@ openai
 requests
 python-dotenv
 mysqlclient==2.2.0
+allauth
