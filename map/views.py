@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import re
 import json
 from .models import TripInfo, User
+from django.contrib.auth.decorators import login_required
 
 
 load_dotenv()
@@ -27,6 +28,7 @@ if openweather_api_key is None:
 
 
 #產生景點
+@login_required
 @csrf_exempt
 def generate_itinerary(request):
     if request.method == "POST":
@@ -123,6 +125,7 @@ def get_weather_forecast(request):
     
 
 # 儲存行程
+@login_required
 @csrf_exempt
 def save_trip(request):
     if request.method == 'POST':
@@ -165,6 +168,7 @@ def save_trip(request):
     
 
 # # #取得儲存的行程
+# @login_required
 # @csrf_exempt
 # def get_saved_trip(request):
 #     user_id = request.GET.get('user_id', 1)  # 從查詢參數中獲取 user_id，默認為 1 測試用

@@ -23,7 +23,7 @@ import requests
 # Create your views here.
 
 
-@ login_required
+@login_required
 def SaveProfile(request):  # 進入網址/blog/profile
     saved = False
     user = request.user
