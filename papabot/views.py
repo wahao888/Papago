@@ -7,7 +7,7 @@ from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import openai
 import os, json
-from functions import weather as wt
+from functions import mydb
 from dotenv import load_dotenv
 
 # 加載.env文件
@@ -48,7 +48,10 @@ def callback(request):
                             # line_bot_api.push_message(user_id, TextMessage(text=msg))
 
                         elif msg == "天氣預報":
-                            reply_msg = wt.weather_search()
+                            reply_msg = mydb.readWeather()
+
+                        elif msg == "行事曆":
+                            reply_msg = mydb.readTrip()
 
                         else:
                             reply_msg = "尚不支援本功能，請重新輸入"
