@@ -56,7 +56,7 @@ def generate_itinerary(request):
 
         return JsonResponse({"places": result})
     else:
-        return render(request, 'index.html')
+        return render(request, 'map.html')
     
 
 #取得經緯度
@@ -80,7 +80,7 @@ def your_view_function(request):
     context = {
         'GOOGLE_MAP_API_KEY': os.environ.get('GOOGLE_MAP_API_KEY'),
     }
-    return render(request, 'index.html', context)
+    return render(request, 'map.html', context)
 
 
 #取得城市天氣資訊
@@ -111,7 +111,7 @@ def get_weather_forecast(request):
                     'weather_main': weather_main,
                     'weather_icon': weather_icon
                 })
-            #print("Forecast data:", forecast_data)
+            print("Forecast data:", forecast_data)
             return JsonResponse({"forecast_data": forecast_data})
             
             #原本只取溫度
@@ -121,7 +121,7 @@ def get_weather_forecast(request):
         else:
             return JsonResponse({"error": "Unable to get weather data"}, status=response.status_code)
     else:
-        return render(request, 'index.html')
+        return render(request, 'map.html')
     
 
 # 儲存行程

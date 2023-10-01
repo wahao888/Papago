@@ -142,6 +142,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [BASE_DIR / "static"] #為了讓網頁讀取到static資料夾
 
 
 django_heroku.settings(locals())
