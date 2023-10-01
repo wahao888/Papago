@@ -13,8 +13,8 @@ def hello(request):
     return render(request, "hello.html", {})
 
 
-def weather_search():
-    city = '新北市'
+def weather_search(city):
+    # city = '新北市'
     location = quote(city, encoding="utf-8")
     msg = "找不到天氣資訊"
     try:
