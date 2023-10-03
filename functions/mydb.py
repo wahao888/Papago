@@ -1,16 +1,22 @@
 from django.contrib.auth.models import User
 from map.models import TripInfo
+from papabot.models import LineId
 from functions import weather
 
 
-def readDB(line_id):
-    user = User.objects.get(username=line_id)
-    res = ""
-    res += str(user.id)
-    return res
+def readDB(line_Id):
+    user = User.objects.filter(username=line_Id)
+    lineId = LineId.objects.filter(line_id=line_Id)
+    if not user and not lineId:
+        return "請先進行帳號連結"
+    elif not user:
+        msg = lineId[0].user_id
+    else:
+        msg = user[0].id
+    return msg
 
-def readWeather():
-    tripinfo = TripInfo.objects.filter(user=1)
+def readWeather(userid):
+    tripinfo = TripInfo.objects.filter(user=userid)
     city = tripinfo[0].trip_name[:3]
     if "台" in city:
         city = city.replace("台","臺")
@@ -19,8 +25,8 @@ def readWeather():
 
     return msg
 
-def readTrip():
-    tripinfo = TripInfo.objects.filter(user=1)
+def readTrip(userid):
+    tripinfo = TripInfo.objects.filter(user=userid)
     tripName = tripinfo[0].trip_name
     locationName = f"{tripName}\n"
 
