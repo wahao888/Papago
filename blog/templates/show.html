@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
       <link rel="icon" href="{% static 'image/favicon.png' %}" type="image/png">
-      <title>產生行程</title>
+      <title>顯示照片</title>
       <!-- Bootstrap CSS -->
       <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
       <link rel="stylesheet" href="{% static 'vendors/linericon/style.css' %}">
@@ -17,7 +17,7 @@
       <!-- main css -->
       <link rel="stylesheet" href="{% static 'css/style.css' %}">
       <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
-      <title>顯示照片</title>
+
   </head>
   <body>
     <!--================Header Area =================-->
@@ -41,8 +41,8 @@
                     <li class="nav-item submenu dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">旅遊日記</a>
                         <ul class="dropdown-menu">
-                            <li class="nav-item"><a class="nav-link" href="blog.html">我的相簿</a></li>
-                            <li class="nav-item"><a class="nav-link" href="blog-single.html">旅遊日記</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'show' %}">我的相簿</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'travel_logs' %}">旅遊日記</a></li>
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="contact.html">登入</a></li>
@@ -69,25 +69,64 @@
     <!--================Breadcrumb Area =================-->
 
     <!--================showphoto Area =================-->
-    <h2>選擇資料夾</h2>
-    <ul>
-      {% for folder in folders %}
-        <li><a href="?folder={{ folder.folder }}">{{ folder.folder }}</a></li>
-      {% endfor %}
-    </ul>
+    <section class="gallery_area section_gap">
+        <div class="container">
+            <div class="section_title text-center">
+                <h2 class="title_color">選擇資料夾</h2>
+                {% for folder in folders %}
+                <li><a href="?folder={{ folder.folder }}">{{ folder.folder }}</a></li>
+                {% endfor %}
+            </div>
+            <div class="container">
+                <div class="section_title text-center">
+                    <h2 class="title_color">{{ selected_folder_name }}</h2>
+                    <p>時間紙包不住也停不住，只有小小的相冊記錄了那一刻的停留</p>
+                </div>
+                {% if photos %}
+                <div class="row imageGallery1 " id="gallery">
+                    <div class="col-md-4 gallery_item">
+                        {% for photo in photos %}
+                        <div class="gallery_img">
+                            <img src="{{ photo.picture.url }}"  alt="{{ photo.folder }}">
+                            <div class="hover">
+                                <a class="light" href="{{ photo.picture.url }}"><i class="fa fa-expand"></i></a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-12 text-center">
+                        {% if photos.has_previous %}
+                        <a href="?folder={{ selected_folder }}&page=1">&laquo; 首頁</a>
+                        <a href="?folder={{ selected_folder }}&page={{ photos.previous_page_number }}">上一頁</a>
+                        {% endif %}
 
-    <h2>圖片</h2>
-    <ul>
-      {% if photos %}
-        {% for photo in photos %}
-          <li>
-            <img src="{{ photo.picture.url }}" alt="{{ photo.folder }}">
-          </li>
-        {% endfor %}
-      {% else %}
-        <p>選擇一個資料夾以查看圖片。</p>
-      {% endif %}
-    </ul>
+                        <span class="current-page">
+                            第 {{ photos.number }} 頁，共 {{ photos.paginator.num_pages }} 頁。
+                        </span>
+
+                        {% if photos.has_next %}
+                        <a href="?folder={{ selected_folder }}&page={{ photos.next_page_number }}">下一頁</a>
+                        <a href="?folder={{ selected_folder }}&page={{ photos.paginator.num_pages }}">尾頁 &raquo;</a>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% else %}
+                <p>選擇一個資料夾以查看圖片。</p>
+
+                <div class="col-md-12 text-center">
+                    <p>想上傳圖片?</p>
+                    <a href="https://papago-abc54f89f470.herokuapp.com/blog/profile/">上傳相片</a>
+                </div>
+                {% endif %}
+
+
+
+
+
+
+
+    </section>
     <!--================showphoto Area =================-->
       <!--================ start footer Area  =================-->
       <footer class="footer-area section_gap">
@@ -170,24 +209,22 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
   <!--================ End footer Area  =================-->
 
 
-      <!-- Optional JavaScript -->
-      <script src="{% static 'js/itinerary.js' %}"></script>
-      <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYOZJoIH2RaGmyx7YnJT1S9XAyL56uKdA&libraries=places&callback=initMap&region=TW&language=zh-TW"
-      async defer></script>
-
-      <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-      <script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
-      <script src="{% static 'js/popper.js' %}"></script>
-      <script src="{% static 'js/bootstrap.min.js' %}"></script>
-      <script src="{% static 'vendors/owl-carousel/owl.carousel.min.js' %}"></script>
-      <script src="{% static 'js/jquery.ajaxchimp.min.js' %}"></script>
-      <script src="{% static 'vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.js' %}"></script>
-      <script src="{% static 'vendors/nice-select/js/jquery.nice-select.js' %}"></script>
-      <script src="{% static 'js/mail-script.js' %}"></script>
-      <script src="{% static 'js/stellar.js' %}"></script>
-      <script src="{% static 'vendors/lightbox/simpleLightbox.min.js' %}"></script>
-      <script src="{% static 'js/custom.js' %}"></script>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="js/jquery-3.2.1.min.js"></script>
+        <script src="js/popper.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="vendors/owl-carousel/owl.carousel.min.js"></script>
+        <script src="js/jquery.ajaxchimp.min.js"></script>
+        <script src="vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.js"></script>
+        <script src="vendors/nice-select/js/jquery.nice-select.js"></script>
+        <script src="js/mail-script.js"></script>
+        <script src="js/stellar.js"></script>
+        <script src="vendors/imagesloaded/imagesloaded.pkgd.min.js"></script>
+        <script src="vendors/isotope/isotope-min.js"></script>
+        <script src="js/stellar.js"></script>
+        <script src="vendors/lightbox/simpleLightbox.min.js"></script>
+        <script src="js/custom.js"></script>
 
   </body>
 </html>
