@@ -51,19 +51,22 @@ def SaveProfile(request):  # 進入網址/blog/profile
 @login_required
 def show(request):      # 進入網址/blog/show
     user = request.user
-    photos = Profile.objects.filter(user=user)   # 查詢當前已登錄用戶上傳的圖片
-    folders = photos.values('folder').distinct()    # 查詢不同的文件夾路徑
+    folders = Profile.objects.filter(user=user).values('folder').distinct()    # 查詢不同的文件夾路徑
     selected_folder = request.GET.get('folder')      # 選擇文件夾，過濾圖片
+    selected_folder_name = " " # 重置資料夾的名稱
     if selected_folder:
-        photos = photos.filter(folder=selected_folder)
+        photos =  Profile.objects.filter(user=user).filter(folder=selected_folder)
+        # 在視圖中獲取當前選定資料夾的名稱
+        selected_folder_name = selected_folder.split("/")[-1] # 獲取資料夾名稱
 
-    # 分頁（使用Django內置的分頁功能）
-    paginator = Paginator(photos, 10)  # 每頁顯示10張圖片
-    page = request.GET.get('page')
-    photos = paginator.get_page(page)
+        # 分頁（使用Django內置的分頁功能）
+        paginator = Paginator(photos, 3)  # 每頁顯示3張圖片
+        page = request.GET.get('page')
+        photos = paginator.get_page(page)
 
-    # 在show.html顯示圖片
-    return render(request, 'show.html', {'folders': folders, 'selected_folder': selected_folder, 'photos': photos})
+        # 在show.html顯示圖片
+        return render(request, 'show.html', {'folders': folders, 'selected_folder': selected_folder, 'photos': photos, 'selected_folder_name': selected_folder_name})
+    return render(request, 'show.html', {'folders': folders, 'selected_folder': selected_folder, 'selected_folder_name': selected_folder_name})
 
 
 @login_required
