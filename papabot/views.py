@@ -71,7 +71,7 @@ def callback(request):
                             if not userLineid and not lineId:
                                 global temp
                                 temp = userId
-                                reply_msg = "請點擊以下網址進行帳號驗證：\nhttps://a804-2001-b011-2019-5dc8-c0be-6cef-9f26-f7.ngrok-free.app/papabot/check/"
+                                reply_msg = "請點擊以下網址進行帳號驗證：\nhttps://papago-abc54f89f470.herokuapp.com/papabot/check/"
                             else:
                                 reply_msg = "帳號已連結"
 
