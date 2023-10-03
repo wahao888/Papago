@@ -1,6 +1,6 @@
-from django.conf import settings
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -9,6 +9,10 @@ import openai
 import os, json
 from functions import mydb
 from dotenv import load_dotenv
+
+from django.contrib.auth.models import User
+from papabot.models import LineId
+from django.contrib.auth import authenticate
 
 # 加載.env文件
 load_dotenv()
@@ -31,8 +35,8 @@ def callback(request):
             if isinstance(event, MessageEvent):
                 if isinstance(event.message, TextMessage):
                     try:
-                        # json_data = json.loads(body)
-                        # user_id = json_data["events"][0]["source"]["userId"]
+                        json_data = json.loads(body)
+                        userId = json_data["events"][0]["source"]["userId"]
                         msg = event.message.text
                         ai_msg = msg[:5].lower() #這行開始為chatGPT
                         reply_msg =""
@@ -48,10 +52,28 @@ def callback(request):
                             # line_bot_api.push_message(user_id, TextMessage(text=msg))
 
                         elif msg == "天氣預報":
-                            reply_msg = mydb.readWeather()
+                            account = mydb.readDB(userId)
+                            if account == "請先進行帳號連結":
+                                reply_msg = account
+                            else:
+                                reply_msg = mydb.readWeather(account)
 
                         elif msg == "行事曆":
-                            reply_msg = mydb.readTrip()
+                            account = mydb.readDB(userId)
+                            if account == "請先進行帳號連結":
+                                reply_msg = account
+                            else:
+                                reply_msg = mydb.readTrip(account)
+
+                        elif msg == "帳號連結":
+                            userLineid = User.objects.filter(username=userId)
+                            lineId = LineId.objects.filter(line_id=userId)
+                            if not userLineid and not lineId:
+                                global temp
+                                temp = userId
+                                reply_msg = "請點擊以下網址進行帳號驗證：\nhttps://a804-2001-b011-2019-5dc8-c0be-6cef-9f26-f7.ngrok-free.app/papabot/check/"
+                            else:
+                                reply_msg = "帳號已連結"
 
                         else:
                             reply_msg = "尚不支援本功能，請重新輸入"
@@ -66,3 +88,25 @@ def callback(request):
 
     else:
         return HttpResponseBadRequest()
+
+
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get("account")
+        password = request.POST.get("pwd")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            userLine = LineId (
+                line_id = temp,
+                user_id = user.id
+            )
+            userLine.save()
+            res = "<h1>驗證並連結成功</h1>"
+            return HttpResponse(res)
+        else:
+            res = "<h1>帳號或密碼錯誤</h1>"
+            return HttpResponse(res)
+
+    return render(request, 'check.html', {})
