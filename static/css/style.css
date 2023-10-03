@@ -800,12 +800,15 @@ button:focus {
   flex: 0 0 30%; /* 占用 30% 的寬度 */
 }
 
+
+
 .itinerary_area {
   position: relative;
   z-index: 1;
   background: #fffff6;
   overflow: hidden;
 }
+
 
 .itinerary_area h2{
   text-align: center;

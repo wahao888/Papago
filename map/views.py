@@ -8,9 +8,10 @@ import os
 from dotenv import load_dotenv
 import re
 import json
-from .models import TripInfo, User
+from .models import TripInfo, WholeTripInfo, User
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
 
 load_dotenv()
 GOOGLE_MAP_API_KEY = os.environ.get('GOOGLE_MAP_API_KEY')
@@ -25,6 +26,11 @@ if openai.api_key is None:
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 if openweather_api_key is None:
     raise EnvironmentError("OPENWEATHER_API_KEY is not set.")
+
+
+@login_required
+def index(request):
+    return render(request, 'map.html')
 
 
 #產生景點
@@ -44,7 +50,7 @@ def generate_itinerary(request):
         )
         print(response.choices[0].text)
         places = response.choices[0].text.split("\n")
-        places = [re.sub(r'^\d+\.\s*|\*|：.*$|^.*、', '', place.strip()) for place in places if place.strip()]
+        places = [re.sub(r'^\d+\.\s*|\*|：.*$|^.*、|-(.*)$', '', place.strip()) for place in places if place.strip()]
         
 
         #找出景點的經緯度
@@ -126,56 +132,39 @@ def get_weather_forecast(request):
 
 # 儲存行程
 @login_required
+@require_POST
 @csrf_exempt
 def save_trip(request):
     if request.method == 'POST':
-        user_id = request.GET.get('user_id', 1)  # 從查詢參數中獲取 user_id，默認為 1 測試用
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return JsonResponse({'status': 'fail', 'message': 'User does not exist'})
-        
-        # 先刪除與這個用戶相關的所有行程
-        TripInfo.objects.filter(user=user).delete()
+        user = request.user
+        WholeTripInfo.objects.filter(user=user).delete()  # 刪除舊的行程信息
 
-        # 現在保存新行程
-        trip_name = request.POST.get('trip_name')
-        trip_day = int(request.POST.get('trip_day'))
-        location_tags = json.loads(request.POST.get('location_tags'))
-        clean_location_tags = [tag.strip() for tag in location_tags]
-        location_info_map = json.loads(request.POST.get('location_info_map'))
-        print("trip_name:",trip_name)
-        print("trip_day:",trip_day)
-        print("clean_location_tags:",clean_location_tags)
-        print("location_info_map:",location_info_map)
+        # 生成 JSON 對象
+        trip_data = {
+            "trip_name": request.POST.get('trip_name'),
+            "trip_day": int(request.POST.get('trip_day')),
+            "day_tags": json.loads(request.POST.get('day_tags', '[]')),
+            "location_tags": json.loads(request.POST.get('location_tags', '[]')),
+            "location_info_map": json.loads(request.POST.get('location_info_map', '[]'))
+        }
 
-        for tag in clean_location_tags:
-            info = next((item for item in location_info_map if item[0].strip() == tag), None)
-            if info:
-                TripInfo.objects.create(
-                    user=user,
-                    trip_name=trip_name,
-                    trip_day=trip_day,
-                    location_name=tag,
-                    latitude=info[1]['lat'],
-                    longitude=info[1]['lng']
-                )
+        # 保存到數據庫
+        WholeTripInfo.objects.create(
+            user=user,
+            trip_data=trip_data
+        )
 
         return JsonResponse({'status': 'success', 'message': 'Trip saved successfully'})
+
     else:
         return JsonResponse({'status': 'fail', 'message': 'Invalid method'})
 
-    
-
-# # #取得儲存的行程
-# @login_required
-# @csrf_exempt
-# def get_saved_trip(request):
-#     user_id = request.GET.get('user_id', 1)  # 從查詢參數中獲取 user_id，默認為 1 測試用
-#     try:
-#         user = User.objects.get(id=user_id)
-#     except User.DoesNotExist:
-#         return JsonResponse({'status': 'fail', 'message': 'User does not exist'})
-    
-#     saved_trips = TripInfo.objects.filter(user=user).values()
-#     return JsonResponse({'status': 'success', 'data': list(saved_trips)})
+#取得儲存的行程
+@login_required
+@csrf_exempt
+def get_saved_trip(request):
+    user = request.user
+    saved_trips = WholeTripInfo.objects.filter(user=user).values()
+    print("User ID:", user)
+    print("Saved trips:", saved_trips)
+    return JsonResponse({'status': 'success', 'data': list(saved_trips)})
