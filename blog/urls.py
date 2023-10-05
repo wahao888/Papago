@@ -3,6 +3,7 @@ from django.urls import re_path as url
 import blog.views
 from django.views.generic import TemplateView
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.views import LogoutView
 
 
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
     url(r'^show/',blog.views.show,name='show'),
     url(r'^createlog/', blog.views.create_travel_log, name='create_travel_log'),
     url(r'^dailylog/', blog.views.view_travel_logs, name='travel_logs'),
+    path('logout/', LogoutView.as_view(next_page='index'), name='logout'),
 ]
