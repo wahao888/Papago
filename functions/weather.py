@@ -57,6 +57,6 @@ def weather_search(city):
             # print(comfort)
             # print('-'*20)
         # return render(request, "weather.html", {"city": city, "datas": datas})
-        return msg
+        return msg.strip()
     except:
         return msg
