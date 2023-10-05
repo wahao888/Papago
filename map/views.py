@@ -145,8 +145,10 @@ def save_trip(request):
             "trip_day": int(request.POST.get('trip_day')),
             "day_tags": json.loads(request.POST.get('day_tags', '[]')),
             "location_tags": json.loads(request.POST.get('location_tags', '[]')),
-            "location_info_map": json.loads(request.POST.get('location_info_map', '[]'))
+            "location_info_map": json.loads(request.POST.get('location_info_map', '[]')),
         }
+
+        print("trip_data:", trip_data)
 
         # 保存到數據庫
         WholeTripInfo.objects.create(

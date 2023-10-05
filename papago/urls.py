@@ -26,7 +26,7 @@ urlpatterns = [
     path("map/", include("map.urls")),
     #登入系統
     path("accounts/", include("allauth.urls")),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("logout/", auth_views.LogoutView.as_view(), name="index"),
     #papabot聊天機器人
     path("papabot/", include("papabot.urls")),
     #主頁面

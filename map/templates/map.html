@@ -48,17 +48,30 @@
                     <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
                         <ul class="nav navbar-nav menu_nav ml-auto">
                             <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">首頁</a></li> 
-                            <li class="nav-item"><a class="nav-link" href="about.html">關於我們</a></li>
                             <li class="nav-item active"><a class="nav-link" href="{% url 'map' %}">產生行程</a></li>
-                            <li class="nav-item"><a class="nav-link" href="gallery.html">嚮導推薦</a></li>
                             <li class="nav-item submenu dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">旅遊日記</a>
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">交通</a>
+                                <ul class="dropdown-menu">
+                                    <li class="nav-item"><a class="nav-link" href="https://www.railway.gov.tw/tra-tip-web/tip/tip001/tip121/query">台鐵</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="https://irs.thsrc.com.tw/IMINT/?utm_source=thsrc&utm_medium=btnlink&utm_term=booking">高鐵</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="https://www.uniair.com.tw/rwd/B2C/booking/ubk_search.aspx">飛機</a></li>
+                                </ul>
+                            </li> 
+                            <li class="nav-item submenu dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">住宿</a>
+                                <ul class="dropdown-menu">
+                                    <li class="nav-item"><a class="nav-link" href="https://www.agoda.com/zh-tw/">Agoda</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="https://www.booking.com/">Booking</a></li>
+                                </ul>
+                            </li> 
+                            <li class="nav-item submenu dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">我的日記</a>
                                 <ul class="dropdown-menu">
                                     <li class="nav-item"><a class="nav-link" href="{% url 'show' %}">我的相簿</a></li>
                                     <li class="nav-item"><a class="nav-link" href="{% url 'create_travel_log' %}">旅遊日記</a></li>
                                 </ul>
                             </li> 
-                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">登入</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">登出</a></li>
                         </ul>
                     </div> 
                 </nav>
@@ -169,7 +182,20 @@
                 </div>
             </div>
         </section>
-        <!--================ Itinerary Area  =================-->
+        <!--================ End Itinerary Area  =================-->
+        <!--================ start weather Area  =================-->	
+        <section class="weather_area section_gap">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background="">  
+            </div>
+            <div class="container">
+                <div class="section_title text-center">
+                    <h2 class="title_w">天氣預報</h2>
+                        <div class="row mb_30" id="weather">
+                        </div>
+                </div>
+            </div>
+        </section>
+        <!--================ End weather Area  =================-->
         <!--================ start footer Area  =================-->	
         <footer class="footer-area section_gap">
             <div class="container">

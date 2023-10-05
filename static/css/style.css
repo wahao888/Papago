@@ -48,6 +48,10 @@ Table of Content:
 
 /*---------------------------------------------------- */
 /*----------------------------------------------------*/
+#location-list li:hover {
+  cursor: grab;
+}
+
 .list_style {
   list-style: none;
   margin: 0px;
@@ -810,6 +814,7 @@ button:focus {
 }
 
 
+
 .itinerary_area h2{
   text-align: center;
   padding-top: 18px;
@@ -849,6 +854,51 @@ button:focus {
 
 /*=============End Itinerary css =============*/
 /*---------------------------------------------------- */
+/*=========== Start weather_area css =============*/
+.weather_area {
+  position: relative;
+  z-index: 1;
+  background: #04091e;
+  overflow: hidden;
+}
+
+.weather_area .bg-parallax {
+  background: url("../image/facilites_bg.jpg") no-repeat scroll center 0/cover;
+  opacity: 0.15;
+}
+
+.weather_item {
+  border: 1px solid #777777;
+  border-radius: 10px;
+  background-color: rgba(249, 249, 255, 0.102);
+  padding: 31px 40px 37px;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.weather_item .sec_h4 {
+  padding-bottom: 18px;
+  color: #fff;
+}
+
+.weather_item .sec_h4 i {
+  color: #f3c300;
+  font-size: 24px;
+  line-height: 38px;
+  display: inline-block;
+  vertical-align: bottom;
+  padding-right: 20px;
+}
+
+.weather_item p {
+  font-size: 14px;
+  line-height: 24px;
+  margin-bottom: 0px;
+}
+
+/*=========== End weather_area css =============*/
+
+
 /*----------------------------------------------------*/
 /*=============Start Accommodation css =============*/
 .accomodation_item {
@@ -1942,6 +1992,92 @@ button:focus {
 
 /*============ End Blog Single Styles  =============*/
 /*---------------------------------------------------- */
+/*============ Start login Single Styles  =============*/
+#login {
+  background: #f2f2f2; /* 淡灰色背景 */
+  border-radius: 10px; /* 圓角 */
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1); /* 陰影效果 */
+  padding: 50px 30px; /* 內部填充 */
+  display: flex; /* 使用 Flexbox 布局 */
+  justify-content: center; /* 水平置中 */
+  align-items: center; /* 垂直置中 */
+}
+
+
+.social-buttons {
+  display: flex;
+  justify-content: space-between; /* 使按鈕在水平方向上均勻分佈 */
+}
+
+.social-buttons ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.social-buttons a {
+  margin-right: 10px; /* 為每個按鈕添加一點右邊距，除了最後一個 */
+}
+
+.social-buttons a:last-child {
+  margin-right: 0; /* 移除最後一個按鈕的右邊距 */
+}
+
+.action-buttons .col-lg-9 {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px;
+}
+
+.action-buttons .btn {
+  flex: 1;  /* 等寬 */
+  text-align: center;  /* 文字置中 */
+  margin-left: 5px;  /* 左邊間距 */
+  margin-right: 5px;  /* 右邊間距 */
+}
+/*============ End login Single Styles  =============*/
+/*============ Start signup Single Styles  =============*/
+
+#signup {
+  background: #f2f2f2; /* 淡灰色背景 */
+  border-radius: 10px; /* 圓角 */
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1); /* 陰影效果 */
+  padding: 50px 30px; /* 內部填充 */
+  display: flex; /* 使用 Flexbox 布局 */
+  justify-content: center; /* 水平置中 */
+  align-items: center; /* 垂直置中 */
+}
+
+.form-container {
+  margin: auto;
+  width: 50%;
+  padding: 20px;
+  background-color: #f1f1f1;
+}
+.form-group {
+  margin-bottom: 15px;
+}
+label {
+  display: inline-block;
+  width: 100px;
+  margin-bottom: 10px;
+}
+input[type="text"], input[type="password"], input[type="email"] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+.btn-primary {
+  background-color: blue;
+  color: white;
+  padding: 14px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+/*============ End signup Single Styles  =============*/
 /*----------------------------------------------------*/
 /*============== contact_area css ================*/
 .mapBox {

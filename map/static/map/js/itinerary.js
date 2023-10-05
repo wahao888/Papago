@@ -173,11 +173,12 @@ function initMap() {
 
                 
                 forecastHtml += `
-                    <div class="card mb-2 p-2" style="background-color: #F2EDE4; color: #A89F91;">
-                        <h5 class="card-title">${formattedDate}</h5>
-                        <p class="card-text">氣溫：${temperature}°C</p>
-                        <p class="card-text">天氣型態：${weatherMain}<img src="${iconUrl}" alt="${weatherMain}"/></p>
-                        
+                    <div class="col-lg-4 col-md-6">
+                        <div class="weather_item">
+                            <h4 class="sec_h4"><i class="lnr lnr-dinner"></i>${formattedDate}</h4>
+                            <p>氣溫：${temperature}°C</p>
+                            <p>天氣型態：${weatherMain}<img src="${iconUrl}" alt="${weatherMain}"/></p>
+                        </div>
                     </div>
                 `;
                 // 更新日期到下一天
@@ -187,7 +188,7 @@ function initMap() {
             document.getElementById("weather").innerHTML = forecastHtml;
             });
         
-        //傳資料到後端
+        //產生行程
         $.post('/map/generate_itinerary/', { location: location, days: days }, function(data) {
             //console.log("Received data from backend:", data);
             //console.log("lat:", data.places[0].lat);
@@ -408,6 +409,8 @@ document.getElementById("clearItinerary").addEventListener("click", function() {
     }
 
     // 清空 locationInfoMap
+    markerInfoMap.clear();
+    detailInfoMap.clear();
     locationInfoMap.clear();
 
     // //清空localStorage
@@ -537,6 +540,7 @@ locationInfoMap.forEach((value, key) => {
 const latLngInfoArray = Array.from(latLngInfoMap.entries());
 // console.log("latLngInfoArray:", latLngInfoArray);
 
+
 $.ajax({
     url: '/map/save_trip/',  
     method: 'POST',
@@ -547,7 +551,6 @@ $.ajax({
         'location_tags': JSON.stringify(locationTags),
         'day_tags': JSON.stringify(dayTags),
         'location_info_map': JSON.stringify(latLngInfoArray),
-
     },
     success: function(response) {
         // 行程成功保存後的操作
@@ -560,7 +563,7 @@ $.ajax({
 });
 });
 
-//重建資料庫中的 locationInfoMap(0926)
+//重建資料與locationInfoMap(0926)
 function loadSavedTrip() {
     const userId = document.getElementById("userId").value;  // 獲取用戶ID
     $.ajax({
@@ -571,7 +574,8 @@ function loadSavedTrip() {
         },
         success: function(response) {
             if (response.status === 'success') {
-                console.log(response);
+                console.log("response:",response);
+                console.log("response.data:",response.data);
                 const savedTrip = response.data[0];  // 假設每個用戶只有一個儲存的行程
                 const locationListElement = document.getElementById("location-list");
                 locationListElement.innerHTML = "";  // 清空現有列表
@@ -616,11 +620,22 @@ function loadSavedTrip() {
                     locationListElement.appendChild(listItem);
                 });
 
-                // 重建 latLngInfoMap
-                const latLngInfoMap = new Map(savedTrip.location_info_map);
 
-                // 如果您之後需要使用 latLngInfoMap，它現在已經被重建完成
-                console.log(latLngInfoMap);
+
+                // 重建 latLngInfoMap(1004)
+                const latLngInfoMap = new Map(savedTrip.trip_data.location_info_map);
+                console.log("latLngInfoMap:",latLngInfoMap);
+                // 遍歷 latLngInfoMap 並填充到 locationInfoMap
+                latLngInfoMap.forEach((value, key) => {
+                    const locationLatLng = {
+                        location: new google.maps.LatLng(value.lat, value.lng)
+                    };
+                    locationInfoMap.set(key, locationLatLng);
+                });
+                // 重建路線
+                drawPathsBetweenLocations()
+                
+                
             } else {
                 console.log("無法獲取保存的行程:", response.message);
             }
@@ -637,7 +652,7 @@ function loadSavedTrip() {
 
 $(function() {
     $("#location-list").sortable({
-        cursor: "move",  // 當拖動時，游標會變成四個方向的箭頭
+        cursor: "grabbing",  // 當拖動時，游標會變成四個方向的箭頭
         update: function(event, ui) {
             // 當排序完成並且 DOM 更新後，重新繪製路徑
             drawPathsBetweenLocations(); // 繪製路徑(0915)
@@ -673,37 +688,30 @@ function generateDayTags(days) {
 
 // 更新行駛時間(0918)
 function updateLocationListWithTime(response) {
+    console.log("updateLocationListWithTime_response:", response);
     const locationListElement = document.getElementById("location-list");
 
     // 刪除所有現有的時間標籤
     const existingTimeTags = locationListElement.querySelectorAll(".time-tag");
     existingTimeTags.forEach(timeTag => timeTag.remove());
-
     // 遍歷各段路徑（legs）來獲取行駛時間
     const legs = response.routes[0].legs;
-
     // 清空陣列
     let driveTimeBetweenLocations = [];
-
     let legIndex = 0;  // 當前正在處理的路徑段索引
 
     // 只選取帶有 "list-group-item" 類名的元素
     const locationItems = locationListElement.querySelectorAll('.list-group-item');
-
     locationItems.forEach((node, index) => {
         const leg = legs[legIndex];
-
-        // 創建時間標籤
         const timeTag = document.createElement("span");
         timeTag.className = "time-tag";
         timeTag.textContent = "車程: " + leg.duration.text;
 
         // 在現有地點後面插入時間標籤
         node.insertAdjacentElement('afterend', timeTag);
-
         // 將行駛時間加入陣列
         driveTimeBetweenLocations.push(leg.duration.text);
-
         legIndex++;  // 更新路徑段索引
     });
 }
