@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from map.models import TripInfo
+from map.models import WholeTripInfo
 from papabot.models import LineId
 from functions import weather
 
@@ -16,21 +16,45 @@ def readDB(line_Id):
     return msg
 
 def readWeather(userid):
-    tripinfo = TripInfo.objects.filter(user=userid)
-    city = tripinfo[0].trip_name[:3]
-    if "台" in city:
-        city = city.replace("台","臺")
+    wholeTripinfo = WholeTripInfo.objects.filter(user=userid)
+    if not wholeTripinfo:
+        return "目前無設定好的行程，請先安排行程"
+    else:
+        userTripinfo = wholeTripinfo[0].trip_data
+        city = userTripinfo["trip_name"][:3]
+        if "台" in city:
+            city = city.replace("台","臺")
 
-    msg = weather.weather_search(city)
+        msg = weather.weather_search(city)
 
-    return msg
+        return msg
 
 def readTrip(userid):
-    tripinfo = TripInfo.objects.filter(user=userid)
-    tripName = tripinfo[0].trip_name
-    locationName = f"{tripName}\n"
+    wholeTripinfo = WholeTripInfo.objects.filter(user=userid)
+    if not wholeTripinfo:
+        return "目前無設定好的行程，請先安排行程"
+    else:
+        userTripinfo = wholeTripinfo[0].trip_data
+        tripName = userTripinfo["trip_name"]
+        days = userTripinfo["day_tags"]
+        locations = userTripinfo["location_tags"]
+        tripDays = userTripinfo["trip_day"]
+        orders = len(days) + len(locations)
+        msg = f"{tripName}\n"
+        start = 0
+        for td in range(tripDays):
+            if td == tripDays - 1:
+                end = start + (orders - days[td]["order"])
+            else:
+                end = start + (days[td + 1]["order"] - days[td]["order"]) - 1
+            msg += "<" + days[td]["text"] + ">" + "\n"
+            for loc in range(start, end):
+                msg += locations[loc]["text"] + "\n"
+            msg += "\n"
 
-    for i in range(len(tripinfo)):
-        locationName += tripinfo[i].location_name + "\t"
+            if td == tripDays - 1:
+                break
+            else:
+                start = end
 
-    return locationName
+        return msg.strip()
