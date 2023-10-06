@@ -3,7 +3,7 @@ from urllib.request import quote
 from datetime import datetime
 
 
-def weather_search(city):
+def weather_search(city): #天氣預報爬蟲
     location = quote(city, encoding="utf-8")
     msg = "找不到天氣資訊"
     try:

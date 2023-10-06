@@ -4,7 +4,7 @@ from papabot.models import LineId
 from functions import weather
 
 
-def verify(line_Id):
+def verify(line_Id): #驗證lineid是否存在資料庫
     user = User.objects.filter(username=line_Id)
     lineId = LineId.objects.filter(line_id=line_Id)
     if not user and not lineId:
@@ -12,7 +12,7 @@ def verify(line_Id):
     return False
 
 
-def readDB(line_Id):
+def readDB(line_Id): #驗證lineid，如果有，回傳userid
     user = User.objects.filter(username=line_Id)
     lineId = LineId.objects.filter(line_id=line_Id)
     if not user and not lineId:
@@ -23,7 +23,7 @@ def readDB(line_Id):
         msg = user[0].id
     return msg
 
-def readWeather(userid):
+def readWeather(userid): #用linebot讀取資料庫行程名稱，再進行天氣預報爬蟲
     wholeTripinfo = WholeTripInfo.objects.filter(user=userid)
     if not wholeTripinfo:
         return "目前無設定好的行程，請先安排行程"
@@ -37,7 +37,7 @@ def readWeather(userid):
 
         return msg
 
-def readTrip(userid):
+def readTrip(userid):  #用linebot讀取資料庫行程
     wholeTripinfo = WholeTripInfo.objects.filter(user=userid)
     if not wholeTripinfo:
         return "目前無設定好的行程，請先安排行程"
