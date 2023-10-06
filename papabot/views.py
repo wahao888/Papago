@@ -20,7 +20,7 @@ line_bot_api = LineBotApi(os.environ.get("LINE_CHANNEL_ACCESS_TOKEN"))
 parser = WebhookParser(os.environ.get("LINE_CHANNEL_SECRET"))
 
 @csrf_exempt
-def callback(request):
+def callback(request):  #linebot
     if request.method == 'POST':
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
@@ -92,7 +92,7 @@ def callback(request):
 
 
 @csrf_exempt
-def login(request):
+def login(request):  #line連結登入驗證
     if request.method == 'POST':
         username = request.POST.get("account")
         password = request.POST.get("pwd")
