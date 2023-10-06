@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}The social account is already connected to a different account.{% endblocktrans %}
+{% blocktrans %}此社群帳號已和其它帳號連結。{% endblocktrans %}

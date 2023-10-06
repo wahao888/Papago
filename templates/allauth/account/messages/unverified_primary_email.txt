@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}Your primary email address must be verified.{% endblocktrans %}
+{% blocktrans %}您需要驗證電子郵件地址，請查看您的電子郵件信箱。{% endblocktrans %}

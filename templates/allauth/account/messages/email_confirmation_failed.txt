@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}Unable to confirm {{email}} because it is already confirmed by a different account.{% endblocktrans %}
+{% blocktrans %}無法驗證 {{email}} ，因為此電子郵件地址已被另一個帳號驗證使用。{% endblocktrans %}

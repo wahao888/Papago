@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}Primary email address set.{% endblocktrans %}
+{% blocktrans %}電子郵件地址已建立。{% endblocktrans %}

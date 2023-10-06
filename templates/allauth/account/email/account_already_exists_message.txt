@@ -1,13 +1,11 @@
 {% extends "account/email/base_message.txt" %}
 {% load i18n %}
 
-{% block content %}{% autoescape off %}{% blocktrans %}You are receiving this email because you or someone else tried to signup for an
-account using email address:
+{% block content %}{% autoescape off %}{% blocktrans %}您收到這封電子郵件是因為您或其他人嘗試使用
+此電子郵件地址註冊帳號：
 
 {{ email }}
 
-However, an account using that email address already exists.  In case you have
-forgotten about this, please use the password forgotten procedure to recover
-your account:
+但是使用該電子郵件地址的帳號已存在。 如果您忘記了，請使用忘記密碼來恢復你的帳號：
 
 {{ password_reset_url }}{% endblocktrans %}{% endautoescape %}{% endblock %}

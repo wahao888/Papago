@@ -1,4 +1,4 @@
 {% load i18n %}
 {% autoescape off %}
-{% blocktrans %}Password Reset Email{% endblocktrans %}
+{% blocktrans %}密碼重置電子郵件。{% endblocktrans %}
 {% endautoescape %}

@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}The social account has been connected.{% endblocktrans %}
+{% blocktrans %}您的社群帳號已連結成功。{% endblocktrans %}

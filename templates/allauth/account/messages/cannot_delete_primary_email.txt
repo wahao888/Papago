@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}You cannot remove your primary email address ({{email}}).{% endblocktrans %}
+{% blocktrans %} 您不能移除您主要的電子郵件地址 ({{email}})。{% endblocktrans %}

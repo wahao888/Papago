@@ -1,12 +1,11 @@
 {% extends "account/email/base_message.txt" %}
 {% load i18n %}
 
-{% block content %}{% autoescape off %}{% blocktrans %}You are receiving this email because you or someone else has requested a
-password for your user account. However, we do not have any record of a user
-with email {{ email }} in our database.
+{% block content %}{% autoescape off %}{% blocktrans %}您收到這封電子郵件是因為您或其他人已要求
+重設您帳號的密碼。 但是在我們資料庫中沒有任何使用者的電子郵件地址為 {{ email }}。
 
-This mail can be safely ignored if you did not request a password reset.
+如果您沒有要求重設密碼，則可以安全地忽略此郵件。
 
-If it was you, you can sign up for an account using the link below.{% endblocktrans %}
+如果是您，可以使用下面的連結註冊帳號。{% endblocktrans %}
 
 {{ signup_url }}{% endautoescape %}{% endblock %}

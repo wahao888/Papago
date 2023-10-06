@@ -9,15 +9,14 @@
 
 {% url 'account_email' as email_url %}
 
-<p>{% blocktrans %}This part of the site requires us to verify that
-you are who you claim to be. For this purpose, we require that you
-verify ownership of your email address. {% endblocktrans %}</p>
+<p>{% blocktrans %}我們需要驗證您的身份。
+因此，我們要求您驗證您的電子郵件地址。 {% endblocktrans %}</p>
 
-<p>{% blocktrans %}We have sent an email to you for
-verification. Please click on the link inside that email. If you do not see the verification email in your main inbox, check your spam folder. Otherwise
-contact us if you do not receive it within a few minutes.{% endblocktrans %}</p>
+<p>{% blocktrans %}我們已向您發送了一封電子郵件確認。
+請點選該郵件內的連結。 如果您在主收件匣中沒有看到驗證信，請檢查您的垃圾郵件資料夾。
+如果您在幾分鐘內沒有收到，請與我們聯絡。{% endblocktrans %}</p>
 
-<p>{% blocktrans %}<strong>Note:</strong> you can still <a href="{{ email_url }}">change your email address</a>.{% endblocktrans %}</p>
+<p>{% blocktrans %}<strong>注意：</strong> 您仍可以 <a href="{{ email_url }}">變更您的電子郵件地址</a>。{% endblocktrans %}</p>
 
 
 {% endblock %}

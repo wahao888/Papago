@@ -1,2 +1,2 @@
 {% load i18n %}
-{% blocktrans %}The social account has been disconnected.{% endblocktrans %}
+{% blocktrans %}此社群帳號已失去連結。{% endblocktrans %}
