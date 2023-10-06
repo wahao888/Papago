@@ -41,14 +41,17 @@ def callback(request):
                         ai_msg = msg[:5].lower() #這行開始為chatGPT
                         reply_msg =""
                         if ai_msg == "go ai":
-                            openai.api_key = os.environ.get("YOUR_API_KEY_NAME")
-                            response = openai.Completion.create(
-                                model = "text-davinci-003",
-                                prompt = msg[5:],
-                                max_tokens = 512,
-                                temperature = 0.5,
-                            )
-                            reply_msg = response["choices"][0]["text"].replace("\n","")
+                            if mydb.verify(userId):
+                                reply_msg = "請先進行帳號連結，再使用此功能。"
+                            else:
+                                openai.api_key = os.environ.get("YOUR_API_KEY_NAME")
+                                response = openai.Completion.create(
+                                    model = "text-davinci-003",
+                                    prompt = msg[5:],
+                                    max_tokens = 512,
+                                    temperature = 0.5,
+                                )
+                                reply_msg = response["choices"][0]["text"].replace("\n","")
                             # line_bot_api.push_message(user_id, TextMessage(text=msg))
 
                         elif msg == "天氣預報":
@@ -66,9 +69,7 @@ def callback(request):
                                 reply_msg = mydb.readTrip(account)
 
                         elif msg == "帳號連結":
-                            userLineid = User.objects.filter(username=userId)
-                            lineId = LineId.objects.filter(line_id=userId)
-                            if not userLineid and not lineId:
+                            if mydb.verify(userId):
                                 global temp
                                 temp = userId
                                 reply_msg = "請點擊以下網址進行帳號驗證：\nhttps://papago-abc54f89f470.herokuapp.com/papabot/check/"
