@@ -4,6 +4,14 @@ from papabot.models import LineId
 from functions import weather
 
 
+def verify(line_Id):
+    user = User.objects.filter(username=line_Id)
+    lineId = LineId.objects.filter(line_id=line_Id)
+    if not user and not lineId:
+        return True
+    return False
+
+
 def readDB(line_Id):
     user = User.objects.filter(username=line_Id)
     lineId = LineId.objects.filter(line_id=line_Id)
