@@ -246,7 +246,7 @@ function initMap() {
 
                                         drawPathsBetweenLocations(); // 繪製路徑(0915)
 
-                                        updateLocationListWithTime(); // 為每一天的行程計算車程時間(1002)
+                                        
                                         }
                                     } else {
                                         console.log("Missing details");
@@ -275,6 +275,7 @@ document.getElementById("add").addEventListener("click", function() {
         </li>
     `
     drawPathsBetweenLocations(); // 繪製路徑(0915)
+
 });
 
 // 刪除行程標籤
@@ -373,13 +374,22 @@ function deleteMarkers() {
 
 // 繪製路徑(0915)
 function drawPathsBetweenLocations() {
+    // 清除舊的路徑
+    if (directionsRenderer) {
+        directionsRenderer.setMap(null);
+        directionsRenderer = null;
+    }
+    
     const locationList = [];
+    console.log("locationList:",locationList);
     // 從 DOM 的 li 元素填充 locationList
     document.querySelectorAll("#location-list li").forEach((li) => {
-        const locationName = li.textContent.trim();
-        const details = locationInfoMap.get(locationName);
-        if (details) {
-            locationList.push(details);
+        if (li.classList.contains("list-group-item")) {  // 只處理具有 "list-group-item" 類名的元素
+            const locationName = li.textContent.trim();
+            const details = locationInfoMap.get(locationName);
+            if (details) {
+                locationList.push(details);
+            }
         }
     });
     if (locationList.length > 1) {
@@ -604,7 +614,6 @@ function generateDayTags(days) {
 
 // 更新行駛時間(0918)
 function updateLocationListWithTime(response) {
-    console.log("updateLocationListWithTime_response:", response);
     const locationListElement = document.getElementById("location-list");
 
     // 刪除所有現有的時間標籤
@@ -618,17 +627,20 @@ function updateLocationListWithTime(response) {
 
     // 只選取帶有 "list-group-item" 類名的元素
     const locationItems = locationListElement.querySelectorAll('.list-group-item');
+
     locationItems.forEach((node, index) => {
         const leg = legs[legIndex];
-        const timeTag = document.createElement("span");
-        timeTag.className = "time-tag";
-        timeTag.textContent = "車程: " + leg.duration.text;
+        if (leg) { // 如果 leg 存在才要執行，因為leg(路徑)會比location少一個
+            const timeTag = document.createElement("span");
+            timeTag.className = "time-tag";
+            timeTag.textContent = "車程: " + leg.duration.text;
 
-        // 在現有地點後面插入時間標籤
-        node.insertAdjacentElement('afterend', timeTag);
-        // 將行駛時間加入陣列
-        driveTimeBetweenLocations.push(leg.duration.text);
-        legIndex++;  // 更新路徑段索引
+            // 在現有地點後面插入時間標籤
+            node.insertAdjacentElement('afterend', timeTag);
+            // 將行駛時間加入陣列
+            driveTimeBetweenLocations.push(leg.duration.text);
+            legIndex++;  // 更新路徑段索引
+        }
     });
 }
 

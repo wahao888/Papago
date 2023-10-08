@@ -100,7 +100,7 @@ def get_weather_forecast(request):
 
         #使用openweather取得天氣資訊
         api_key = openweather_api_key
-        url = f"http://api.openweathermap.org/data/2.5/forecast?lat={city_lat}&lon={city_lng}&units=metric&lang=zh_tw&appid={api_key}"
+        url = f"https://api.openweathermap.org/data/2.5/forecast?lat={city_lat}&lon={city_lng}&units=metric&lang=zh_tw&appid={api_key}"
         response = requests.get(url)
         if response.status_code == 200:
             weather_data = response.json() 
