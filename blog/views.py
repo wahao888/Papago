@@ -65,8 +65,17 @@ def show(request):      # 進入網址/blog/show
         photos = paginator.get_page(page)
 
         # 在show.html顯示圖片
-        return render(request, 'show.html', {'folders': folders, 'selected_folder': selected_folder, 'photos': photos, 'selected_folder_name': selected_folder_name})
-    return render(request, 'show.html', {'folders': folders, 'selected_folder': selected_folder, 'selected_folder_name': selected_folder_name})
+        return render(request, 'show.html', {
+            'folders': folders, 
+            'selected_folder': selected_folder, 
+            'photos': photos, 
+            'selected_folder_name': selected_folder_name
+            })
+    return render(request, 'show.html', {
+        'folders': folders, 
+        'selected_folder': selected_folder, 
+        'selected_folder_name': selected_folder_name
+        })
 
 
 @login_required
@@ -96,4 +105,7 @@ def view_travel_logs(request):
             selected_log = get_object_or_404(
                 TravelLog, id=log_id, user=request.user)
 
-    return render(request, 'view_travel_logs.html', {'travel_logs': travel_logs, 'selected_log': selected_log})
+    return render(request, 'view_travel_logs.html', {
+        'travel_logs': travel_logs, 
+        'selected_log': selected_log
+        })

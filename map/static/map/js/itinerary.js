@@ -25,38 +25,8 @@ function initMap() {
         zoom: 9
     });
 
-/*
-    // 從 localStorage 讀取 location-list
-    const locationList = JSON.parse(localStorage.getItem("location-list")) || [];
-    // 更新頁面
-    locationList.forEach((location) => {
-        document.getElementById("location-list").innerHTML += `
-            <li class="list-group-item">
-                ${location.name}
-                <button class="btn-close float-end remove"></button>
-            </li>
-        `;
-    });
-
-    // 從 localStorage 中恢復 locationInfoMap
-    const storedLocationInfoArray = JSON.parse(localStorage.getItem('locationInfo')) || [];
-    locationInfoMap = new Map(storedLocationInfoArray);
-    
-    // 使用恢復的 locationInfoMap 重新創建地圖上的標記和 InfoWindow
-    locationInfoMap.forEach((locationInfo, name) => {
-        // 創建標記
-        const marker = new google.maps.Marker({
-            position: locationInfo.location,
-            map: map,
-            title: locationInfo.name
-        });
-    }); 
-*/
     // 使用者登入後來到此頁面能重建出原本的資料(1003)
     loadSavedTrip();
-
-
-
 
     //搜尋框及自動完成
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -98,12 +68,9 @@ function initMap() {
                 opening_hours: place.opening_hours ? place.opening_hours : "none",
                 photos: place.photos ?  place.photos : "none",
             };
-            //console.log("location:", selectedMarker.location);
-            //console.log("location_type:", typeof selectedMarker.location);
 
             //地圖中心移動到選擇的地點
             map.setCenter(selectedMarker.location);
-
 
             marker = new google.maps.Marker({
                 map: map
@@ -111,7 +78,8 @@ function initMap() {
 
             marker.setPosition(selectedMarker.location);//建立標記
 
-            const formattedOpeningHours = selectedMarker.opening_hours.weekday_text ? selectedMarker.opening_hours.weekday_text.join('<br>') : "none";
+            const formattedOpeningHours = selectedMarker.opening_hours.weekday_text 
+                ? selectedMarker.opening_hours.weekday_text.join('<br>') : "none";
             const photoUrl = (selectedMarker.photos && selectedMarker.photos[0]) 
                 ? selectedMarker.photos[0].getUrl()
                 : "無照片可用";
@@ -189,21 +157,13 @@ function initMap() {
             });
         
         //產生行程
-        $.post('/map/generate_itinerary/', { location: location, days: days }, function(data) {
-            //console.log("Received data from backend:", data);
-            //console.log("lat:", data.places[0].lat);
-            //console.log("lng:", data.places[0].lng);
-            
+        $.post('/map/generate_itinerary/', { location: location, days: days }, function(data) {           
             //for each前端取得詳細資訊加到selectedMarker
             const geocoder = new google.maps.Geocoder();
             const service = new google.maps.places.PlacesService(map);
             data.places.forEach((place, index) => {
                 if (place.lat && place.lng) {
                 const latLng = new google.maps.LatLng(place.lat, place.lng);
-                //console.log("index:", index);
-                //console.log("latLng:", latLng);
-                //console.log("type_lat:",typeof place.lat, "type_lng:",typeof place.lng);
-                //console.log("lat:", latLng.lat(), "lng:", latLng.lng());
                 
                 // 使用 Geocoder 進行逆地理編碼
                 geocoder.geocode({'location': latLng}, function(results, status) {
@@ -223,7 +183,6 @@ function initMap() {
                                     //console.log("status_placesService:", status);
                                     if (details) {
                                         // 儲存詳細資訊
-                                            
                                             const generateDetails = {
                                                 location: latLng,
                                                 placeId: details.place_id ?? "未提供",
@@ -235,9 +194,6 @@ function initMap() {
                                                 opening_hours: details.opening_hours ?? "未提供",
                                                 photos: details.photos  ?  details.photos  : "none",
                                             };
-                                            //console.log("generateDetails:", generateDetails);
-                                            //console.log("location:", generateDetails.location);
-                                            //console.log("details.photos:", details.photos);
                                         
                                         // 在地圖上創建標記
                                         const generateMarker = new google.maps.Marker({
@@ -246,15 +202,16 @@ function initMap() {
                                             title: generateDetails.name
                                         });
                                         
-
                                         //顯示詳細資訊
                                         infowindow = new google.maps.InfoWindow();
-                                        const formattedGenerateDetailsOpeningHours = generateDetails.opening_hours && generateDetails.opening_hours.weekday_text 
+                                        const formattedGenerateDetailsOpeningHours = generateDetails.opening_hours 
+                                            && generateDetails.opening_hours.weekday_text 
                                             ? generateDetails.opening_hours.weekday_text.join('<br>') 
                                             : "none";
-                                        const generateDetailsphotoUrl = (generateDetails.photos && generateDetails.photos[0] && typeof generateDetails.photos[0].getUrl === 'function') 
-                                        ? generateDetails.photos[0].getUrl() 
-                                        : "null";
+                                        const generateDetailsphotoUrl = (generateDetails.photos && generateDetails.photos[0] 
+                                            && typeof generateDetails.photos[0].getUrl === 'function') 
+                                            ? generateDetails.photos[0].getUrl() 
+                                            : "null";
 
                                         infowindow.setContent(`
                                             <h3>${generateDetails.name}</h3>
@@ -284,22 +241,12 @@ function initMap() {
                                             </li>
                                         `;
                                         
-                                        // // 將新地點添加到 localStorage 中的地點列表
-                                        // const detailList = JSON.parse(localStorage.getItem("location-list")) || [];
-                                        // detailList.push(generateDetails);
-                                        // localStorage.setItem("location-list", JSON.stringify(detailList));
-                                        
                                         //將該地點的名稱和相應的infowindow添加到markerInfoMap給路徑使用(0915)
                                         locationInfoMap.set(generateDetails.name, generateDetails);
 
                                         drawPathsBetweenLocations(); // 繪製路徑(0915)
 
                                         updateLocationListWithTime(); // 為每一天的行程計算車程時間(1002)
-                                        
-
-                                        // // 將locationInfoMap轉換為陣列，儲存到 localStorage，以便在頁面重新加載時使用
-                                        // const locationInfoArray = Array.from(locationInfoMap.entries());
-                                        // localStorage.setItem('locationInfo', JSON.stringify(locationInfoArray));
                                         }
                                     } else {
                                         console.log("Missing details");
@@ -328,14 +275,6 @@ document.getElementById("add").addEventListener("click", function() {
         </li>
     `
     drawPathsBetweenLocations(); // 繪製路徑(0915)
-
-    // const locationList = JSON.parse(localStorage.getItem("location-list")) || [];
-    // locationList.push(selectedMarker);
-    // localStorage.setItem("location-list", JSON.stringify(locationList));
-
-    // // 將locationInfoMap轉換為陣列，儲存到 localStorage，以便在頁面重新加載時使用
-    // const locationInfoArray = Array.from(locationInfoMap.entries());
-    // localStorage.setItem('locationInfo', JSON.stringify(locationInfoArray));
 });
 
 // 刪除行程標籤
@@ -361,19 +300,8 @@ document.getElementById("location-list").addEventListener("click", function(e) {
         if (locationInfoMap.has(locationName)) {
             locationInfoMap.delete(locationName);
         }
-        
-        // const locationList = JSON.parse(localStorage.getItem("location-list")) || [];
-        // const newLocationList = locationList.filter(function(location) {
-        //     if (location.name === locationName) return false;
-        //     return true;
-        // });
-        // localStorage.setItem("location-list", JSON.stringify(newLocationList));
 
         drawPathsBetweenLocations(); // 繪製路徑(0915)
-
-        // // 將locationInfoMap轉換為陣列，儲存到 localStorage，以便在頁面重新加載時使用
-        // const locationInfoArray = Array.from(locationInfoMap.entries());
-        // localStorage.setItem('locationInfo', JSON.stringify(locationInfoArray));
     }
 });
 
@@ -394,9 +322,6 @@ document.getElementById("location-list").addEventListener("click", function(e) {
 
 // 清空行程
 document.getElementById("clearItinerary").addEventListener("click", function() {
-    // // 清空 localStorage 中的 location-list
-    // localStorage.removeItem("location-list");
-
     // 清空頁面上的行程列表
     document.getElementById("location-list").innerHTML = '';
 
@@ -412,9 +337,6 @@ document.getElementById("clearItinerary").addEventListener("click", function() {
     markerInfoMap.clear();
     detailInfoMap.clear();
     locationInfoMap.clear();
-
-    // //清空localStorage
-    // localStorage.clear();
 });
 
     
@@ -452,7 +374,6 @@ function deleteMarkers() {
 // 繪製路徑(0915)
 function drawPathsBetweenLocations() {
     const locationList = [];
-
     // 從 DOM 的 li 元素填充 locationList
     document.querySelectorAll("#location-list li").forEach((li) => {
         const locationName = li.textContent.trim();
@@ -461,7 +382,6 @@ function drawPathsBetweenLocations() {
             locationList.push(details);
         }
     });
-
     if (locationList.length > 1) {
         // 初始化 directionsService 和 directionsRenderer
         if (!directionsService) {
@@ -472,7 +392,6 @@ function drawPathsBetweenLocations() {
                 map,
             });
         }
-
         const origin = locationList[0].location;
         const destination = locationList[locationList.length - 1].location;
         const waypoints = locationList.slice(1, -1).map((locationInfo) => {
@@ -481,7 +400,6 @@ function drawPathsBetweenLocations() {
                 stopover: true
             };
         });
-
         directionsService.route(
             {
                 origin: new google.maps.LatLng(origin.lat(), origin.lng()),
@@ -526,7 +444,6 @@ $("#location-list li").each(function() {
     }
     index++;
 });
-
 
 // 把 locationInfoMap 轉換成一個數組來儲存
 const latLngInfoMap = new Map();
@@ -662,7 +579,6 @@ $(function() {
 });
 
 
-// 天數標籤和把行程標籤分開(1002)-開始
 //產生天數標籤
 function generateDayTags(days) {
     const locationListElement = document.getElementById("location-list");
@@ -716,6 +632,3 @@ function updateLocationListWithTime(response) {
     });
 }
 
-
-
-// 天數標籤和把行程標籤分開(1002)-結束
