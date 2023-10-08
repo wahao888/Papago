@@ -86,43 +86,36 @@
       <section class="gallery_area section_gap">
          <div class="container">
             <div class="section_title text-center">
-                <h2 class="title_color">上傳照片</h2>
-                <p>時間紙包不住也停不住，只有小小的相冊記錄了那一刻的停留</p>
+               <h2 class="title_color">上傳照片</h2>
+               <p>時間紙包不住也停不住，只有小小的相冊記錄了那一刻的停留</p>
             </div>
          <form name = "form" enctype = "multipart/form-data"
-            action = "{% url "SaveProfile" %}" method = "POST" >{% csrf_token %}
-
+            action = "{% url 'SaveProfile' %}" method = "POST" >{% csrf_token %}
             <div class="input_area" style = "max-width:470px;">
                <center>
                   <input type = "text" style = "margin-left:20%;" placeholder = "Name" name = "name" value="請輸入標籤" />
                </center>
             </div>
-
             <br>
-
             <div class="input_area" style = "max-width:470px;">
                <center>
                   <input type = "file" style = "margin-left:20%;" placeholder = "picture" name = "picture" multiple=""/>
                </center>
             </div>
-
             <br>
-
             <div class="button_area" style = "max-width:470px;">
                <center>
-
                   <button style = "border:0px;background-color:#4285F4; margin-top:8%;
                      height:35px; width:80%; margin-left:19%; " type = "submit">
                      <strong>上傳</strong>
                   </button>
-
                </center>
             </div>
-
          </form>
       </section>
 
       <!--================uploadpicture Area =================-->
+
         <!--================ start footer Area  =================-->	
         <footer class="footer-area section_gap">
          <div class="container">
