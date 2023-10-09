@@ -7,7 +7,7 @@ from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import openai
 import os, json
-from functions import mydb
+from functions import mydb, weather
 from dotenv import load_dotenv
 
 from django.contrib.auth.models import User
