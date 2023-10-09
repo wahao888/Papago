@@ -29,7 +29,7 @@ def readWeather(userid): #用linebot讀取資料庫行程名稱，再進行天�
         return "目前無設定好的行程，請先安排行程"
     else:
         userTripinfo = wholeTripinfo[0].trip_data
-        city = userTripinfo["trip_name"][:3]
+        city = userTripinfo["trip_name"][:-4]
         if "台" in city:
             city = city.replace("台","臺")
 
