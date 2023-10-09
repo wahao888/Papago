@@ -4,5 +4,5 @@ from . import views
 
 urlpatterns = [
     url(r'^callback/', views.callback, name='callback'),
-
+    url(r'^check/', views.login, name="checkacount"),
 ]
