@@ -59,7 +59,11 @@ def callback(request):  #linebot
                             if account == "請先進行帳號連結":
                                 reply_msg = account
                             else:
-                                reply_msg = mydb.readWeather(account)
+                                rw = mydb.readWeather(account)
+                                if rw == "找不到天氣資訊":
+                                    reply_msg = "找不到天氣資訊，請輸入縣市全名。"
+                                else:
+                                    reply_msg = rw
 
                         elif msg == "行事曆":
                             account = mydb.readDB(userId)
@@ -77,7 +81,12 @@ def callback(request):  #linebot
                                 reply_msg = "帳號已連結"
 
                         else:
-                            reply_msg = "尚不支援本功能，請重新輸入"
+                            if len(msg) == 3 and (msg[2] == "市" or msg[2] == "縣"):
+                                if "台" in msg:
+                                    msg = msg.replace("台","臺")
+                                reply_msg = weather.weather_search(msg)
+                            else:
+                                reply_msg = "尚不支援本功能，請重新輸入"
 
                         message = TextSendMessage(text=reply_msg)
                         line_bot_api.reply_message(event.reply_token,message)
