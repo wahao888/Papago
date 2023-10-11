@@ -19,6 +19,7 @@ load_dotenv()
 line_bot_api = LineBotApi(os.environ.get("LINE_CHANNEL_ACCESS_TOKEN"))
 parser = WebhookParser(os.environ.get("LINE_CHANNEL_SECRET"))
 
+temp = ""
 @csrf_exempt
 def callback(request):  #linebot
     if request.method == 'POST':
