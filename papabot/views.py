@@ -102,6 +102,7 @@ def callback(request):  #linebot
 
 @csrf_exempt
 def login(request):  #line連結登入驗證
+    line_ID = temp
     if request.method == 'POST':
         username = request.POST.get("account")
         password = request.POST.get("pwd")
@@ -109,7 +110,7 @@ def login(request):  #line連結登入驗證
         user = authenticate(request, username=username, password=password)
         if user is not None:
             userLine = LineId (
-                line_id = temp,
+                line_id = line_ID,
                 user_id = user.id
             )
             userLine.save()
