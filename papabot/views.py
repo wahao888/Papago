@@ -78,6 +78,9 @@ def callback(request):  #linebot
                                 global temp
                                 temp = userId
                                 reply_msg = "請點擊以下網址進行帳號驗證：\nhttps://papago-abc54f89f470.herokuapp.com/papabot/check/"
+                                message = TextSendMessage(text=reply_msg)
+                                line_bot_api.reply_message(event.reply_token,message)
+
                                 return HttpResponse()
                             else:
                                 reply_msg = "帳號已連結"
@@ -104,22 +107,25 @@ def callback(request):  #linebot
 
 @csrf_exempt
 def login(request):  #line連結登入驗證
-    line_ID = temp
-    if request.method == 'POST':
-        username = request.POST.get("account")
-        password = request.POST.get("pwd")
+    if temp != "":
+        if request.method == 'POST':
+            username = request.POST.get("account")
+            password = request.POST.get("pwd")
 
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            userLine = LineId (
-                line_id = line_ID,
-                user_id = user.id
-            )
-            userLine.save()
-            res = "<h1>驗證並連結成功</h1>"
-            return HttpResponse(res)
-        else:
-            res = "<h1>帳號或密碼錯誤</h1>"
-            return HttpResponse(res)
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                userLine = LineId (
+                    line_id = temp,
+                    user_id = user.id
+                )
+                userLine.save()
+                res = "<h1>驗證並連結成功</h1>"
+                return HttpResponse(res)
+            else:
+                res = "<h1>帳號或密碼錯誤</h1>"
+                return HttpResponse(res)
 
-    return render(request, 'check.html', {})
+        return render(request, 'check.html', {})
+    else:
+        res = "<h1>請重新點擊帳號驗證網址</h1>"
+        return HttpResponse(res)
