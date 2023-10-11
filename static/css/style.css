@@ -2003,6 +2003,22 @@ button:focus {
   align-items: center; /* 垂直置中 */
 }
 
+/* 媒體查詢，僅適用於寬度小於或等於 950px 的裝置 */
+@media (max-width: 950px) {
+  #login, .card {
+    flex-direction: column; /* 使元素垂直排列 */
+    align-items: stretch; /* 元素填充整個容器寬度 */
+  }
+
+  .action-buttons .col-lg-9, .social-buttons ul {
+    flex-direction: column;  /* 使按鈕垂直排列 */
+    align-items: stretch;  /* 按鈕填充整個容器寬度 */
+  }
+
+  .action-buttons .btn, .social-buttons a {
+    margin-bottom: 10px; /* 添加底部邊距 */
+  }
+}
 
 .social-buttons {
   display: flex;
@@ -2035,6 +2051,24 @@ button:focus {
   text-align: center;  /* 文字置中 */
   margin-left: 5px;  /* 左邊間距 */
   margin-right: 5px;  /* 右邊間距 */
+}
+
+/* 媒體查詢：在小於或等於 950px 寬度的裝置上 */
+@media (max-width: 950px) {
+  /* 使 ul 變為垂直排列 */
+  .social-buttons ul {
+    flex-direction: column;
+  }
+
+  /* 更新按鈕的邊距設定 */
+  .social-buttons a {
+    margin-right: 0;
+    margin-bottom: 10px;  /* 為每個按鈕添加一點下邊距，除了最後一個 */
+  }
+
+  .social-buttons a:last-child {
+    margin-bottom: 0; /* 移除最後一個按鈕的下邊距 */
+  }
 }
 /*============ End login Single Styles  =============*/
 /*============ Start signup Single Styles  =============*/
