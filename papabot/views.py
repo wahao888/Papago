@@ -78,6 +78,7 @@ def callback(request):  #linebot
                                 global temp
                                 temp = userId
                                 reply_msg = "請點擊以下網址進行帳號驗證：\nhttps://papago-abc54f89f470.herokuapp.com/papabot/check/"
+                                return HttpResponse()
                             else:
                                 reply_msg = "帳號已連結"
 
